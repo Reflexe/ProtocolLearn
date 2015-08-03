@@ -1,12 +1,12 @@
 [submodule "examples"]
 	path = examples
-	url = ../ProtocolLearn-Examples
+	url = git@github.com:ProtocolLearn/ProtocolLearn-Examples.git
 [submodule "libraries"]
 	path = libraries
-	url = ../ProtocolLearn-Libraries
+	url = git@github.com:ProtocolLearn/ProtocolLearn-Libraries.git
 [submodule "utilities"]
 	path = utilities
-	url = ../ProtocolLearn-Utilities
+	url = git@github.com:ProtocolLearn/ProtocolLearn-Utilities.git
 [submodule "protocols"]
 	path = protocols
-	url = ../ProtocolLearn-Protocols
+	url = git@github.com:ProtocolLearn/ProtocolLearn-Protocols.git
