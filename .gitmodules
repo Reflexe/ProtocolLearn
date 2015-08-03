@@ -1,0 +1,12 @@
+[submodule "examples"]
+	path = examples
+	url = ../ProtocolLearn-Examples
+[submodule "libraries"]
+	path = libraries
+	url = ../ProtocolLearn-Libraries
+[submodule "utilities"]
+	path = utilities
+	url = ../ProtocolLearn-Utilities
+[submodule "protocols"]
+	path = protocols
+	url = ../ProtocolLearn-Protocols
