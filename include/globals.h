@@ -38,7 +38,16 @@
 # define debug //
 #endif
 
-#define IgnoreUnusedParameterWarning(arg) (void)arg
+namespace ProtocolLearn {
+
+template<class T>
+inline void IgnoreUnusedParameterWarning(const T &)
+{
+}
+
+}
+
+//#define IgnoreUnusedParameterWarning(arg) (void)arg
 
 // Check the compiler's version.
 #if __cplusplus < 201103L
