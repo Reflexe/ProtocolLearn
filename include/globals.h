@@ -28,10 +28,12 @@
 
 // We are not debugging!
 #define DEBUG
+#define PROTOCOLFILTER_DEBUG
 
 #ifdef DEBUG
-# include <assert.h>
+# include <cassert>
 # include <iostream>
+# include <typeinfo> // for std::bad_cast
 # define debug std::cerr << "DEBUG: " << __PRETTY_FUNCTION__ << ":" << __LINE__ << " Says: "
 #else
 # define assert(expr)
@@ -43,6 +45,42 @@ namespace ProtocolLearn {
 template<class T>
 inline void IgnoreUnusedParameterWarning(const T &)
 {
+}
+
+template<class Base, class Derived>
+constexpr inline bool isBaseOf(Derived) {
+
+    return std::is_base_of<Base, typename std::remove_reference<Derived>::type>::value;
+}
+
+template<class Base, class Derived>
+constexpr inline bool isBaseOf() {
+
+    return std::is_base_of<Base, typename std::remove_reference<Derived>::type>::value;
+}
+
+template<class Base, class Derived>
+constexpr inline bool isBaseOf(Derived *) {
+
+    return std::is_base_of<Base, Derived>::value;
+}
+
+template<class To, class From>
+inline bool isValidCast(const From &type) {
+    static_assert(std::is_polymorphic<From>::value, "Your class isn't polymophic");
+    static_assert(std::is_polymorphic<To>::value, "Your class isn't polymophic");
+
+    // Check dynamicly if we can to convert it.
+    try{
+        auto temp = dynamic_cast<const To &>(type);
+        IgnoreUnusedParameterWarning(temp);
+    }
+    catch(const std::bad_cast &)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }
