@@ -30,9 +30,13 @@ class CreateProtocol:
         return string
 
     def get_set_function(self, field_name, size):
-        return 'void set%s(%s %s) { %s->%s = %s; }' % (field_name, self.get_str_size(size), self.set_first_lower_case(field_name),
-                                                       self.set_first_lower_case(self.struct_name), self.set_first_lower_case(field_name),
-                                                       self.get_byte_order_host_to_network(size, self.set_first_lower_case(field_name)))
+        return 'void set%s(%s %s) { getHeader().%s = %s; }' % (
+                                                               field_name,
+                                                               self.get_str_size(size),
+                                                               self.set_first_lower_case(field_name),
+                                                               self.set_first_lower_case(field_name),
+                                                               self.get_byte_order_host_to_network(size, self.set_first_lower_case(field_name))
+                                                               )
 
     def get_sets(self):
         set_functions = ''
@@ -43,8 +47,11 @@ class CreateProtocol:
         return set_functions
 
     def get_get_function(self, field_name, size):
-        return '%s get%s() const{ return %s; }' % (self.get_str_size(size), field_name,
-                                                   self.get_byte_order_network_to_host(size, self.set_first_lower_case(self.struct_name) + '->' +self.set_first_lower_case(field_name)))
+        return '%s get%s() const{ return %s; }' % (
+                                                               self.get_str_size(size),
+                                                               field_name,
+                                                               self.get_byte_order_network_to_host(size, "getHeader()." + self.set_first_lower_case(field_name))
+                                                               )
 
     def get_gets(self):
         get_functions = ''

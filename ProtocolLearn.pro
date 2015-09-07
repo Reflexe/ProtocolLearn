@@ -4,4 +4,6 @@ CONFIG += ordered
 
 DISTFILES += \
     README.md \
-    TODO.md
+    TODO.md \
+    scripts/createprotocol.py \
+    scripts/createtype.sh
