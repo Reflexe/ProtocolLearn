@@ -1,4 +1,4 @@
-PL_BUILD_DIR = $$PWD/build
+PL_BUILD_DIR = $$PWD/Build
 PL_LIBRARYS_DIR = $$PL_BUILD_DIR
 PL_SOURCE_DIR = $$PWD
 
@@ -12,4 +12,4 @@ defineTest(includeProtocolLearnUtility) {
     export(LIBS)
 }
 
-INCLUDEPATH *= $$PWD/include
+INCLUDEPATH *= $$PWD/Include

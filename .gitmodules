@@ -1,12 +1,12 @@
 [submodule "examples"]
-	path = examples
+	path = Examples
 	url = git@github.com:ProtocolLearn/ProtocolLearn-Examples.git
 [submodule "libraries"]
-	path = libraries
+	path = Libraries
 	url = git@github.com:ProtocolLearn/ProtocolLearn-Libraries.git
 [submodule "utilities"]
-	path = utilities
+	path = Utilities
 	url = git@github.com:ProtocolLearn/ProtocolLearn-Utilities.git
 [submodule "protocols"]
-	path = protocols
+	path = Protocols
 	url = git@github.com:ProtocolLearn/ProtocolLearn-Protocols.git

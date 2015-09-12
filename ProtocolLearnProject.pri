@@ -18,4 +18,3 @@ defineTest(includeProtocolLearnLibrary) {
 CONFIG += c++11
 CONFIG -= QT
 QT =
-LIBS += -lpthread

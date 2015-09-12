@@ -1,9 +1,9 @@
 TEMPLATE = subdirs
-SUBDIRS = utilities protocols libraries examples
+SUBDIRS = Utilities Protocols Libraries Examples Include
 CONFIG += ordered
 
 DISTFILES += \
     README.md \
     TODO.md \
-    scripts/createprotocol.py \
-    scripts/createtype.sh
+    Scripts/createprotocol.py \
+    Scripts/createtype.sh
