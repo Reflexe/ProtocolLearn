@@ -8,5 +8,5 @@ fi
 CPP_INCLUDE_OPEN="#include \"../"
 CPP_INCLUDE_END="\""
 
-echo $CPP_INCLUDE_OPEN$1$CPP_INCLUDE_END > include/$2 
-git add include/$2
+echo $CPP_INCLUDE_OPEN$1$CPP_INCLUDE_END > Include/$2 
+git add Include/$2
