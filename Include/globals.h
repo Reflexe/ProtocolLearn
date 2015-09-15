@@ -40,6 +40,8 @@
 # define debug //
 #endif
 
+#include <type_traits>
+
 namespace ProtocolLearn {
 
 template<class T>
