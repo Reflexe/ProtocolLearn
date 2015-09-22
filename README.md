@@ -3,7 +3,7 @@
 ![ProtocolLearn's Logo](https://github.com/ProtocolLearn/ProtocolLearn/blob/master/Images/Logo.png)
 
 ## Overview
-ProtocolLearn is a C++ Network library for linux that pointed in Low level networking. ProtocolLearn also provides a API for creating of new protocols.
+ProtocolLearn is a C++ Network library for linux that pointed in Low level networking. ProtocolLearn is also providing an API for creating of new protocols.
 
 ## Get ProtocolLearn:
 Note: ProtocolLearn uses [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules), therefore, the regular 'git clone [url]' command will download only the base repository without the submodules. 
