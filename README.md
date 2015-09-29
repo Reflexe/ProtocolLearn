@@ -23,7 +23,7 @@ If you interesting in a specific type of ProtocolLearn, please visit [ProtocolLe
 ProtoclLearn has three general parts:
 * [Utilities](https://github.com/ProtocolLearn/ProtocolLearn-Utilities): Contains the core of ProtocolLearn: Types, Addresses (eg. Ipv4Address), helpers (StringFunctions, VectorFunctions, ByteOrder) and more.
 * [Protocols](https://github.com/ProtocolLearn/ProtocolLearn-Protocols): Contains implomented protocols (eg. Ethernet and Ipv4).
-* [Examples](https://github.com/ProtocolLearn/ProtocolLearn-Examples) and [Libraries](https://github.com/ProtocolLearn/ProtocolLearn-Libraries): In "Examples", there are examples for the usage of ProtocolLearn's performed protocols. "Libraries" contains examples too, but with an option to add the example into your project.
+* [Examples](https://github.com/ProtocolLearn/ProtocolLearn-Examples) and [Libraries](https://github.com/ProtocolLearn/ProtocolLearn-Libraries): In "Examples", there are examples for the usage of ProtocolLearn's implomented protocols. "Libraries" contains examples too, but with an option to add the example into your project.
 
 ## Build
 ProtocolLearn based on [qmake](https://en.wikipedia.org/wiki/Qmake) (qt projects).
