@@ -31,8 +31,8 @@ First of all, you must have Linux machine, qmake, and gcc.
 
 Open ProtocolLearn directory and run the build script:
 ```console
-$ cd ~/ProtocolLearn
-$ ./Build/build.sh
+$ cd ~/ProtocolLearn/Build/
+$ ./build.sh
 ```
 It will take a few minutes.
 Your executable files will be in the build directory.
