@@ -121,10 +121,6 @@ def main(args):
     print
     print cp.get_struct()
     print
-    print cp.get_enum()
-    print
-    print cp.get_get_value()
-    print
 
 
 if __name__ == '__main__':
