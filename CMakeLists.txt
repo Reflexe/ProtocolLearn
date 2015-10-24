@@ -6,7 +6,6 @@ set(pl_cpp_ext cpp)
 
 enable_testing()
 
-# No no o PL is PERL?
 function(pl_add_module target_path caller_name)
     get_filename_component(target_name ${target_path} NAME)
 

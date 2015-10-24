@@ -26,23 +26,12 @@ ProtoclLearn has three general parts:
 * [Examples](https://github.com/ProtocolLearn/ProtocolLearn-Examples) and [Libraries](https://github.com/ProtocolLearn/ProtocolLearn-Libraries): In "Examples", there are examples for the usage of ProtocolLearn's implomented protocols. "Libraries" contains examples too, but with an option to add the example into your project.
 
 ## Build
-ProtocolLearn based on [qmake](https://en.wikipedia.org/wiki/Qmake) (qt projects).
-First of all, you must have Linux machine, qmake, and gcc.
+First of all, you must have Linux machine, CMake, and GCC.
 
 Open ProtocolLearn directory and run the build script:
 ```console
-$ cd ~/ProtocolLearn/Build/
-$ ./build.sh
+$ cd ~/ProtocolLearn
+$ ./Build/Build.sh
 ```
 It will take a few minutes.
 Your executable files will be in the build directory.
-
-Also, you can use Qt Creator to open, edit and config the project:
-```console
-$ qtcreator ProtocolLearn.pro
-```
-
-Set the build path to ProtocolLearn Path/Build (With the upper case 'B', the image isn't updated)
-![Config ProtocolLearn in Qt Creator](https://github.com/shrek0/ProtocolLearn/blob/master/images/ProtocolLearnConfigQtCreator.png)
-
-To compile your project, Just press CTL+b.
