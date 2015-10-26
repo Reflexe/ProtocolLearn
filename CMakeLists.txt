@@ -13,12 +13,14 @@ function(pl_add_module target_path caller_name)
        message(FATAL_ERROR "${target_path} is not exist!")
     endif(NOT EXISTS "${target_path}/")
 
-    include_directories("${pl_root}/${target_path}/")
+    target_include_directories(${caller_name} PUBLIC "${pl_root}/${target_path}/")
     target_link_libraries(${caller_name} ${target_name})
 endfunction(pl_add_module target_path caller_name)
 
-include_directories("${pl_root}/Include")
-include_directories(".")
+macro(pl_add_module_auto_caller target_path)
+    pl_add_module(${target_path} ${PROJECT_NAME})
+endmacro(pl_add_module_auto_caller target_path)
+
 set_property(GLOBAL PROPERTY CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
