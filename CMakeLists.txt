@@ -1,8 +1,20 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+
 set(pl_root ${CMAKE_CURRENT_SOURCE_DIR})
 set(pl_library_type STATIC)
 set(pl_cpp_ext cpp)
+
+set(pl_debug 1)
+
+if(pl_debug EQUAL "1")
+    set(CMAKE_BUILD_TYPE Debug)
+else(pl_debug EQUAL "1")
+    set(CMAKE_BUILD_TYPE Release)
+endif(pl_debug EQUAL "1")
+
 
 enable_testing()
 
