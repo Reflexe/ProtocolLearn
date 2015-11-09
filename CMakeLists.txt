@@ -15,15 +15,18 @@ else(pl_debug EQUAL "1")
     set(CMAKE_BUILD_TYPE Release)
 endif(pl_debug EQUAL "1")
 
-
 enable_testing()
 
 function(pl_add_module target_path caller_name)
     get_filename_component(target_name ${target_path} NAME)
 
-    if(NOT EXISTS "${target_path}/")
+    if(NOT IS_DIRECTORY "${target_path}/")
        message(FATAL_ERROR "${target_path} is not exist!")
-    endif(NOT EXISTS "${target_path}/")
+    endif(NOT IS_DIRECTORY "${target_path}/")
+
+    if(NOT TARGET ${target_name})
+        message(FATAL_ERROR "${target_name} is not a valid target!")
+    endif(NOT TARGET ${target_name})
 
     target_include_directories(${caller_name} PUBLIC "${pl_root}/${target_path}/")
     target_link_libraries(${caller_name} ${target_name})
@@ -40,4 +43,3 @@ add_subdirectory(Utilities)
 add_subdirectory(Protocols)
 add_subdirectory(Libraries)
 add_subdirectory(Examples)
-
