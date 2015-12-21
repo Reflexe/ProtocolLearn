@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file rtnetlinkstream.cpp
  * @author shrek0 (shrek0.tk@gmail.com)
+  RtNetlinkStream
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,17 @@
  * @section DESCRIPTION
  *
  */
+
+#include "RtNetlinkStream.h"
+
+namespace ProtocolLearn {
+
+
+
+namespace RtNetlink {
+
+} // ProtocolLearn
+
+
+
+} // RtNetlink

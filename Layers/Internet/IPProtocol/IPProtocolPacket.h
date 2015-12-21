@@ -21,3 +21,28 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef PROTOCOLLEARN_IPPROTOCOLPACKET_H
+#define PROTOCOLLEARN_IPPROTOCOLPACKET_H
+
+#include "Packet.h"
+
+namespace ProtocolLearn {
+
+class IPProtocolPacket : public Packet
+{
+public:
+    static const OctetVector::SizeType MinimumHeaderLength = 0;
+
+    IPProtocolPacket(OctetVector::SizeType headerSize);
+
+    const OctetVector &getPseudoHeader() const;
+    OctetVector &getPseudoHeader();
+
+private:
+    OctetVector mPseudoHeader;
+};
+
+} // namespace ProtocolLearn
+
+#endif // PROTOCOLLEARN_IPPROTOCOLPACKET_H

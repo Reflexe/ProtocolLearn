@@ -21,3 +21,13 @@
  * @section DESCRIPTION
  *
  */
+#include "TransportProtocol.h"
+
+namespace ProtocolLearn {
+
+TransportProtocol::TransportProtocol()
+{
+
+}
+
+} // namespace ProtocolLearn

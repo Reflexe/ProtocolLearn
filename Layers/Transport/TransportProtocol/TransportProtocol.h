@@ -21,3 +21,20 @@
  * @section DESCRIPTION
  *
  */
+#ifndef PROTOCOLLEARN_TRANSPORTPROTOCOL_H
+#define PROTOCOLLEARN_TRANSPORTPROTOCOL_H
+
+#include "BasicProtocol.h"
+
+namespace ProtocolLearn {
+
+class TransportProtocol : public BasicProtocol
+{
+public:
+    TransportProtocol();
+    virtual ~TransportProtocol() = default;
+};
+
+} // namespace ProtocolLearn
+
+#endif // PROTOCOLLEARN_TRANSPORTPROTOCOL_H

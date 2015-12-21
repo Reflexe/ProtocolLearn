@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file NetlinkDataStream.h
  * @author shrek0 (shrek0.tk@gmail.com)
+  NetlinkDataStream
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,27 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef NETLINKDATASTREAM_H
+#define NETLINKDATASTREAM_H
+
+#include "DataStreamUnderPacketStream.h"
+
+#include "NetlinkStream.h"
+
+namespace ProtocolLearn {
+namespace Netlink {
+
+class NetlinkDataStream : public DataStreamUnderPacketStream<NetlinkStream>
+{
+public:
+    NetlinkDataStream(NetlinkStream &netlinkStream, uint16_t type, uint32_t proccessID, uint16_t flags);
+};
+
+} // ProtocolLearn
+
+
+
+} // Netlink
+
+#endif // NETLINKDATASTREAM_H

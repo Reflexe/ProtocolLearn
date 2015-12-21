@@ -21,3 +21,20 @@
  * @section DESCRIPTION
  *
  */
+
+#include "LinkProtocol.h"
+
+namespace ProtocolLearn {
+
+LinkProtocol::LinkProtocol()
+{
+}
+
+LinkProtocol::LinkProtocolFork::LinkProtocolFork(std::unique_ptr<BasicInterface::BasicInterfaceFork> &&basicInterface)
+    : mBasicInterfaceFork{std::move(basicInterface)}
+{
+
+}
+
+} // namespace ProtocolLearn
+

@@ -1,0 +1,3 @@
+pl_add_library(SocketInterface SocketInterface)
+
+pl_add_module_auto_caller(Utilities/Interface Layers/Link/BasicInterface)

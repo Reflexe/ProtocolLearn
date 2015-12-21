@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file
  * @author shrek0 (shrek0.tk@gmail.com)
+ 
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,26 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef PROTOCOLLEARN_UDPDATASTREAM_H
+#define PROTOCOLLEARN_UDPDATASTREAM_H
+
+#include "DataStreamUnderPacketStream.h"
+
+#include "UdpStream.h"
+
+#include "Random.h"
+
+namespace ProtocolLearn {
+namespace Udp {
+
+class UdpDataStream : public DataStreamUnderPacketStream<UdpStream>
+{
+public:
+    UdpDataStream(UdpStream &udpStream, uint16_t destinationPort, uint16_t sourcePort=Random::getMediumRandomNumber());
+};
+
+} // namespace Udp
+} // namespace ProtocolLearn
+
+#endif // PROTOCOLLEARN_UDPDATASTREAM_H

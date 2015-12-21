@@ -21,3 +21,15 @@
  * @section DESCRIPTION
  *
  */
+
+#include "InternetProtocol.h"
+
+namespace ProtocolLearn {
+
+InternetProtocol::InternetProtocol()
+{
+
+}
+
+} // namespace ProtocolLearn
+

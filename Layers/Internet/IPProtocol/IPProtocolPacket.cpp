@@ -21,3 +21,26 @@
  * @section DESCRIPTION
  *
  */
+
+#include "IPProtocolPacket.h"
+
+namespace ProtocolLearn {
+
+IPProtocolPacket::IPProtocolPacket(OctetVector::SizeType headerSize)
+    : Packet{headerSize}
+{
+
+}
+
+const OctetVector &IPProtocolPacket::getPseudoHeader() const
+{
+    return mPseudoHeader;
+}
+
+OctetVector &IPProtocolPacket::getPseudoHeader()
+{
+    return mPseudoHeader;
+}
+
+} // namespace ProtocolLearn
+

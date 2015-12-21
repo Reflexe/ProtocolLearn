@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file rtnetlinkpacket.cpp
  * @author shrek0 (shrek0.tk@gmail.com)
+  RtNetlinkPacket
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,27 @@
  * @section DESCRIPTION
  *
  */
+
+#include "RtNetlinkPacket.h"
+
+namespace ProtocolLearn {
+namespace RtNetlink {
+
+RtNetlinkPacket::RtNetlinkPacket()
+{
+}
+
+void RtNetlinkPacket::onPacketImport() {
+    if(isDataPacket())
+        rtattrParser.parse(getVectorData());
+    else
+        getParser().clearOptions();
+}
+
+void RtNetlinkPacket::onPacketExport()
+{
+    importData(rtattrParser.toOctetVector());
+}
+
+} // ProtocolLearn
+} // RtNetlink

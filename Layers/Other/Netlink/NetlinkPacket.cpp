@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file netlinkpacket.cpp
  * @author shrek0 (shrek0.tk@gmail.com)
+  NetlinkPacket
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,20 @@
  * @section DESCRIPTION
  *
  */
+
+#include "NetlinkPacket.h"
+
+namespace ProtocolLearn {
+namespace Netlink {
+
+NetlinkPacket::NetlinkPacket()
+{
+}
+
+void NetlinkPacket::onPacketExport()
+{
+    getHeader().nlmsg_len = getPacketLength();
+}
+
+} // ProtocolLearn
+} // Netlink

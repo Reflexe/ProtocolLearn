@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file
  * @author shrek0 (shrek0.tk@gmail.com)
+ 
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,16 @@
  * @section DESCRIPTION
  *
  */
+
+#include "TcpStream.h"
+
+namespace ProtocolLearn {
+namespace Tcp {
+
+TcpStream::TcpStream(IPProtocolStream &dataStream)
+    : PacketStreamUnderPacketStream<IPProtocolStream, PacketStream<TcpPacket, TcpFilter>>{dataStream}
+{
+}
+
+}
+}

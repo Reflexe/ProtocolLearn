@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file
  * @author shrek0 (shrek0.tk@gmail.com)
+ 
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,23 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef PROTOCOLLEARN_ICMP_ICMPSTREAM_H
+#define PROTOCOLLEARN_ICMP_ICMPSTREAM_H
+
+#include "PacketStreamUnderDataStream.h"
+
+#include "IcmpFilter.h"
+#include "IcmpPacket.h"
+
+#include "Ipv4DataStream.h"
+
+namespace ProtocolLearn {
+namespace Icmp {
+
+typedef PacketStreamUnderDataStream<IcmpPacket, IcmpFilter> IcmpStream;
+
+} // namespace Icmp
+} // namespace ProtocolLearn
+
+#endif // PROTOCOLLEARN_ICMP_ICMPSTREAM_H

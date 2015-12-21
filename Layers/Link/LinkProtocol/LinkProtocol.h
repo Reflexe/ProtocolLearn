@@ -21,3 +21,37 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef PROTOCOLLEARN_LINKPROTOCOL_H
+#define PROTOCOLLEARN_LINKPROTOCOL_H
+
+#include <memory>
+
+#include "BasicProtocol.h"
+#include "BasicInterface.h"
+
+namespace ProtocolLearn {
+
+class LinkProtocol : public BasicProtocol
+{
+public:
+    LinkProtocol();
+
+    struct LinkProtocolFork{
+        LinkProtocolFork(std::unique_ptr<BasicInterface::BasicInterfaceFork> &&basicInterface);
+        virtual ~LinkProtocolFork() = default;
+
+        virtual LinkProtocol &getLinkProtocol() = 0;
+
+    protected:
+        std::unique_ptr<BasicInterface::BasicInterfaceFork> mBasicInterfaceFork;
+    };
+
+    virtual std::unique_ptr<LinkProtocolFork> fork(bool reply=false) = 0;
+
+    virtual BasicInterface &getBasicInterface() = 0;
+};
+
+} // namespace ProtocolLearn
+
+#endif // PROTOCOLLEARN_LINKPROTOCOL_H

@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file netlinkdatastream.cpp
  * @author shrek0 (shrek0.tk@gmail.com)
+  NetlinkDataStream
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,21 @@
  * @section DESCRIPTION
  *
  */
+
+#include "NetlinkDataStream.h"
+
+namespace ProtocolLearn {
+namespace Netlink {
+
+NetlinkDataStream::NetlinkDataStream(NetlinkStream &netlinkStream, uint16_t type, uint32_t proccessID, uint16_t flags)
+    : DataStreamUnderPacketStream(netlinkStream) {
+
+    mSendPacket.setType(type);
+    mSendPacket.setProccessID(proccessID);
+    mSendPacket.setFlags(flags);
+
+    getPacketStream().getFilter().filterByPacket(mSendPacket);
+}
+
+} // ProtocolLearn
+} // Netlink

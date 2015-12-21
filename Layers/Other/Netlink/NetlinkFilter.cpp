@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file netlinkfilter.cpp
  * @author shrek0 (shrek0.tk@gmail.com)
+  NetlinkFilter
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,25 @@
  * @section DESCRIPTION
  *
  */
+
+#include "NetlinkFilter.h"
+
+namespace ProtocolLearn {
+namespace Netlink {
+
+NetlinkFilter::NetlinkFilter()
+{
+}
+
+NetlinkFilter::DropReasonType NetlinkFilter::checkByProtocol(const NetlinkPacket &filteredPacket) {
+     if(filteredPacket.isDataPacket() == false)
+         return ProtocolDropReason::NoData;
+     else
+         return DropReason::None;
+}
+
+} // ProtocolLearn
+
+
+
+} // Netlink

@@ -21,3 +21,32 @@
  * @section DESCRIPTION
  *
  */
+
+#include "IPProtocolStream.h"
+
+namespace ProtocolLearn {
+
+IPProtocolStream::IPProtocolStream(InternetProtocol &internetProtocol)
+    : PacketStreamUnderDataStream{internetProtocol}
+{
+}
+
+void IPProtocolStream::_recv(IPProtocolPacket &packet) {
+    PacketStreamUnderDataStream::_recv(packet);
+
+    updatePseudoHeaderRecv(packet);
+}
+
+void IPProtocolStream::_send(IPProtocolPacket &packet) {
+    updatePseudoHeaderSend(packet);
+
+    PacketStreamUnderDataStream::_send(packet);
+}
+
+IPProtocolStream::IPProtocolStreamFork::IPProtocolStreamFork(std::unique_ptr<InternetProtocol::InternetProtocolFork> &&internetProtocolFork)
+    : mInternetProtocol{std::move(internetProtocolFork)}
+{
+}
+
+} // namespace ProtocolLearn
+

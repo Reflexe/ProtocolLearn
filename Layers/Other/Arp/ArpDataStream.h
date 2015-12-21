@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file ArpDataStream.h
  * @author shrek0 (shrek0.tk@gmail.com)
+  ArpDataStream
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,25 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef ARPDATASTREAM_H
+#define ARPDATASTREAM_H
+
+#include "ArpStream.h"
+
+#include "DataStreamUnderPacketStream.h"
+
+namespace ProtocolLearn {
+namespace Arp {
+
+class ArpDataStream : public DataStreamUnderPacketStream<ArpStream>
+{
+public:
+    ArpDataStream(ArpStream &arpStream, uint16_t hardwareFormat, uint16_t protocolFormat,
+                  uint8_t hardwareLength, uint8_t protocolLength, uint16_t opcode);
+};
+
+} // Arp
+} // ProtocolLearn
+
+#endif // ARPDATASTREAM_H

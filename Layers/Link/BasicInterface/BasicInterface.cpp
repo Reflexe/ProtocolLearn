@@ -21,3 +21,15 @@
  * @section DESCRIPTION
  *
  */
+
+#include "BasicInterface.h"
+
+namespace ProtocolLearn {
+
+BasicInterface::BasicInterface()
+{
+
+}
+
+} // namespace ProtocolLearn
+

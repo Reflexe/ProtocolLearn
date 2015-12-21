@@ -1,9 +1,10 @@
 /**
- * @file %{FILENAME}
+ * @file rtnetlinkFilter.h
  * @author shrek0 (shrek0.tk@gmail.com)
+  RtNetlinkFilter
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) %YEAR% shrek0
+ * ProtocolLearn copyright (C) 2015 shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,3 +22,32 @@
  * @section DESCRIPTION
  *
  */
+
+#ifndef RTNETLINKFILTER_H
+#define RTNETLINKFILTER_H
+
+#include "ProtocolFilter.h"
+
+#include "RtNetlinkPacket.h"
+
+namespace ProtocolLearn {
+namespace RtNetlink {
+
+class RtNetlinkFilter : public ProtocolFilter<RtNetlinkPacket>
+{
+public:
+    RtNetlinkFilter();
+
+    enum ProtocolDropReason {
+        NoData
+    };
+
+protected:
+    virtual DropReasonType checkByProtocol(const RtNetlinkPacket &filteredPacket) override final;
+
+};
+
+} // ProtocolLearn
+} // RtNetlink
+
+#endif // RTNETLINKFILTER_H
