@@ -1,5 +1,0 @@
-add_subdirectory(Link)
-add_subdirectory(Other)
-add_subdirectory(Internet)
-add_subdirectory(Transport)
-add_subdirectory(Application)

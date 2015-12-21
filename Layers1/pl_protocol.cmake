@@ -1,5 +1,0 @@
-pl_add_module_auto_caller(Utilities/PacketWrapper)
-pl_add_module_auto_caller(Utilities/ByteOrder)
-pl_add_module_auto_caller(Utilities/DataStreamUnderPacketStream)
-pl_add_module_auto_caller(Utilities/PacketStreamUnderDataStream)
-pl_add_module_auto_caller(Utilities/ProtocolFilter)

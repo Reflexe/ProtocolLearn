@@ -1,3 +1,0 @@
-pl_add_library(BasicInterface BasicInterface)
-
-pl_add_module_auto_caller(Utilities/BasicProtocol Utilities/MacAddress Utilities/Ipv4Address Utilities/Ipv6Address)
