@@ -11,7 +11,7 @@ Note: ProtocolLearn uses [Git Submodules](https://git-scm.com/book/en/v2/Git-Too
 To download ProtocolLearn, run the following lines:
 
 ```console
-git clone --recursive git@github.com:ProtocolLearn/ProtocolLearn.git
+git clone --recursive git@gitlab.com:ProtocolLearn/ProtocolLearn.git
 ```
 
 ## Getting Started
