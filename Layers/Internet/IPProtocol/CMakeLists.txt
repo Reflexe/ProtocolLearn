@@ -1,0 +1,3 @@
+pl_add_library(IPProtocol IPProtocolStream IPProtocolPacket)
+
+pl_add_module_auto_caller(Utilities/Packet Utilities/PacketStreamUnderDataStream Layers/Internet/InternetProtocol)

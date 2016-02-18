@@ -1,0 +1,5 @@
+#define __PL_DEBUG @pl_debug@
+#define PL_DEBUG_BASE_PATH "@pl_root@"
+#if __PL_DEBUG == 1
+# define PL_DEBUG
+#endif

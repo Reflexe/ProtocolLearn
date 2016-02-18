@@ -1,0 +1,3 @@
+pl_add_library(VirtualDataStream VirtualDataStream)
+
+pl_add_module_auto_caller(Utilities/DataStream)
