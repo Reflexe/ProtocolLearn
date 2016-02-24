@@ -44,7 +44,7 @@ std::list<Ipv4Packet> Ipv4Fragmenter::fragmentPacket(const Ipv4Packet &packetToS
 
     // Get only the header.
     Ipv4Packet temporaryPacket;
-    temporaryPacket.fromRawPacket(packetToSplit.getVectorHeader());
+    temporaryPacket.fromRawPacket(OctetVector{packetToSplit.getVectorHeader()});
     clearNotRequiredOptions(temporaryPacket);
 
     pl_assert(maximumPacketSize > temporaryPacket.getHeaderLength());

@@ -70,6 +70,8 @@ public:
     Ipv4OptionsParser &getParser() { return mOptionsParser; }
     const Ipv4OptionsParser &getParser() const{ return mOptionsParser; }
 
+    virtual void fromRawPacket(OctetVector &&rawPacket) override final;
+
     bool isChecksumValid() const;
     bool isValidPacket() const{ return mParsingError == ParsingError::None; }
 
@@ -87,7 +89,6 @@ protected:
     virtual void onPacketExport() override final;
 
 private:
-    void parseOptions();
     void updateHeaderLength();
     void updateChecksum();
     void setInvalidPacket(ParsingError parsingError);

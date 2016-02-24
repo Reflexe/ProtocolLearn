@@ -58,27 +58,35 @@ OctetVector Packet::getUnrequiredHeader() {
     return OctetVector(getVectorHeader().cbegin()+getMinimumHeaderLength(), getVectorHeader().cend());
 }
 
-void Packet::fromRawPacket(const OctetVector &rawPacket, const OctetVector::SizeType &headerLength) {
-    if(headerLength < getMinimumHeaderLength()
-            || rawPacket.size() < getMinimumHeaderLength()
-            || rawPacket.size() < headerLength)
-        throw InvalidArgument("Header length or rawPacket's size is invalid");
+void Packet::fromRawPacket(OctetVector &&rawPacket, OctetVector::SizeType headerLength) {
+    pl_assert(headerLength >= getMinimumHeaderLength());
+    pl_assert(rawPacket.size() >= getMinimumHeaderLength());
+    pl_assert(rawPacket.size() >= headerLength);
 
     d.header.clear();
     d.data.clear();
 
     pl_assert(isValidSizeType(headerLength));
 
-    d.header.insert(d.header.end(), rawPacket.begin(), rawPacket.begin()+headerLength);
+    if (rawPacket.size() == headerLength) {
+        d.header = std::move(rawPacket);
+    } else {
+        auto dataIterator = rawPacket.begin()+headerLength;
 
-    // If the we have data, copy it to d.data.
-    if(rawPacket.size() != headerLength) {
+        d.header.assign(rawPacket.begin(), dataIterator);
+
+        // If the we have data, copy it to d.data.
         pl_assert(isValidSizeType(rawPacket.size()-headerLength));
 
-        d.data.insert(d.data.end(), rawPacket.begin()+headerLength, rawPacket.end());
+        d.data.assign(dataIterator, rawPacket.end());
     }
 
     onPacketImport();
+}
+
+void Packet::fromRawPacket(OctetVector &&rawPacket)
+{
+    return fromRawPacket(std::move(rawPacket), getMinimumHeaderLength());
 }
 
 void Packet::fromPacket(Packet &packet)

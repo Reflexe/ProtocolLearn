@@ -28,6 +28,7 @@
 
 #include <limits>
 #include <list>
+#include <deque>
 #include <map>
 
 #include "DataStreamUnderPacketStream.h"
@@ -40,20 +41,20 @@ namespace ProtocolLearn {
 namespace Tcp {
 
 /**
- * @brief An implomation of the Transmission Constrol Protocol (TCP).
+ * @brief An implementation of the Transmission Constrol Protocol (TCP).
  * @see [RFC 793](https://tools.ietf.org/html/rfc793).
  *
- * Implomention Progress (v: implomented; ?: partical or unknown; x: not implometed).
+ * Implementation Progress (v: implomented; ?: partical or unknown; x: not implometed).
  *   Connection Establishing and closing:
  *     v connect(): Create a new connection.
  *     v completeAccept(): Answer a creation request (SYN).
  *     v close(): Close the stream.
  *   Sending and receiving of data:
- *     ? Window Size: Updated but static number; the newest packet will update the window; use ipv4 path MTU discovery for that.
+ *     ? Window Size: Updated but static number; the newest packet will update your window; use ipv4 path MTU discovery for that.
  *     v Fragmention (sendDataPacket).
- *     v Reassembling (ReceiveQueue and _recv(), receivePacket()).
- *     v Retransmition (RetrasmitionQueue and sync(), retransmitPackets()).
- *     v Receiving of data sending ACKSs (waitForPacket()).
+ *     v Reassembling (ReceiveQueue, _recv() and receivePacket()).
+ *     v Retransmition (RetrasmitionQueue, sync() and retransmitPackets()).
+ *     v Send ACK by for received datas (waitForPacket()).
  *     v Receive Size Filter (receiveData()).
  *     v Handling no place in the Window (sendDataPacket()).
  *     x Urgent and all that shit.
@@ -99,7 +100,7 @@ public:
      * By default, we're dropping packet without the required length.
      * With TCP, we should wait until we receive enough data.
      */
-    virtual void receiveData(OctetVector &data) override;
+    virtual OctetVector receiveData() override;
 
     /**
      * @brief Send data in the TCP.
@@ -110,7 +111,7 @@ public:
      * After that, the function sends the data and put it in the the
      * retransmit queue.
      */
-    virtual void _send(const OctetVector &data) override;
+    virtual void _send(OctetVector &&data) override;
 
     /**
      * @brief Receive a data in the TCP protocol.
@@ -121,7 +122,7 @@ public:
      * (by receiving of FIN or RST packet). The function will send ack for the packets it receives, even
      * if they're FIN or RST packets).
      */
-    virtual void _recv(OctetVector &data) override;
+    virtual OctetVector _recv() override;
 
     /**
      * @brief Set a timeout for the general operations like _recv(), _send() and sync().
@@ -172,8 +173,6 @@ private:
         SynPacket
     };
 
-//    OctetVector::SizeType getMaximumTransmissionUnit();
-
     void retransmitPackets();
 
     void updateDropHandler();
@@ -189,8 +188,8 @@ private:
     void sendAcknowledment();
     void sendReset(const TcpPacket &tcpPacket);
 
-    void sendFragment(const OctetVector &octetVector, uint32_t sequenceNumber);
-    void sendFragmentInWindow(const OctetVector &octetVector);
+    void sendFragment(OctetVector &&octetVector, uint32_t sequenceNumber);
+    void sendFragmentInWindow(OctetVector &&octetVector);
 
     void sendPacket(TcpPacketType packetType, uint32_t sequenceNumber);
     void sendPacketInWindow(TcpPacketType packetType, uint32_t sequenceNumber);
@@ -222,11 +221,10 @@ private:
         void push(OctetVector &&octetVector, const TcpSequenceNumber &tcpSequenceNumber);
 
         /**
-         * @brief Fill @arg octetVector with the data space that recived (ordered by sequence number).
-         * @param octetVector
+         * @brief Fill an OctetVector with the data space that recived (ordered by sequence number).
          * @note Unexcpected results if the queue is empty().
          */
-        void pop_front(OctetVector &octetVector);
+        OctetVector pop_front();
 
         /**
          * @brief Check if the queue is empty.
@@ -239,16 +237,20 @@ private:
         void setNextSequenceNumber(const uint32_t &nextSequenceNumber);
         uint32_t getNextSequenceNumber();
 
+        OctetVector::SizeType getCurrentSize() const;
+
     private:
         typedef std::map<TcpSequenceNumber, OctetVector> MapType;
 
         void addToReceiveBuffer(OctetVector &&octetVector);
         void mergeReceiveMapToReceiveBuffer();
+        OctetVector joinReceiveBuffer();
 
         uint32_t mNextSequenceNumber = 0;
 
         MapType mReceiveMap;
-        OctetVector mReceiveBuffer;
+        std::deque<OctetVector> mReceiveBuffer;
+        OctetVector::SizeType mCurrentSize = 0;
     };
 
     /**

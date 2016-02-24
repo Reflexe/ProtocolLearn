@@ -65,20 +65,41 @@ public:
     static void addDebbugedClass(const std::string &string)
     {}
 #endif
-
-
 };
+
+//class DebugColors {
+//#define pl__define_color(ColorName, Number) constexpr static char ColorName[] = "\033["#Number"m";
+//#define pl__define_colorb(ColorName, BackgroundNumber, Number) constexpr static char ColorName[] = "\033["#Number"m";
+
+
+//    pl__define_color(Regular, 0);
+//    pl__define_color(Black, 30);
+//    pl__define_color(Red, 31);
+//    pl__define_color(Green, 32);
+//    pl__define_color(Brown, 33);
+//    pl__define_color(Blue, 34);
+//    pl__define_color(purple, 35);
+//    pl__define_color(Cyan, 36);
+//    pl__define_color(Gray, 37);
+
+//#undef pl__define_colorb
+//#undef pl__define_color
+//};
 
 } // namespace ProtocolLearn
 
 #ifdef PL_DEBUG
 # define pl_assert(expr) ::ProtocolLearn::Debug::assert((expr), #expr, __PRETTY_FUNCTION__, __LINE__, __FILE__)
-# define pl_debug(debug_string) if(::ProtocolLearn::Debug::isDebbugedFile(__FILE__)) (::ProtocolLearn::Debug::crap << "[\033[1;31m" << __PRETTY_FUNCTION__ << "\033[0m]: \033[1;35m" << debug_string << "\033[0m" << ::std::endl)
+# define pl_debug(debug_string) if(::ProtocolLearn::Debug::isDebbugedFile(__FILE__)) (::ProtocolLearn::Debug::crap << "[\033[1;31m" << \
+    __PRETTY_FUNCTION__ << "\033[0m]: \033[1;35m" << debug_string << "\033[0m" << ::std::endl)
 # define pl_crap(debug_string) pl_debug(debug_string)
+# define pl_strange(debug_string) (::ProtocolLearn::Debug::debug << "[\033[1;36m" << __PRETTY_FUNCTION__ << "\033[0m]: \033[1;35m" << \
+    debug_string << "\033[0m" << ::std::endl)
 #else
 # define pl_assert(expr) ((void)0)
 # define pl_debug(debug_string) ((void)0)
 # define pl_crap(debug_string) ((void)0)
+# define pl_strange(debug_string) ((void)0)
 #endif
 
 #endif // PROTOCOLLEARN_DEBUG_H

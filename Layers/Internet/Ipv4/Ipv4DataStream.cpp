@@ -31,6 +31,7 @@
 
 #include "Random.h"
 #include "IcmpDataStream.h"
+#include "Ipv4Fragmenter.h"
 
 namespace ProtocolLearn {
 namespace Ipv4 {
@@ -49,31 +50,31 @@ Ipv4DataStream::Ipv4DataStream(Ipv4Stream &ipv4Stream, const Ipv4Address &destin
     getPacketStream().getFilter().filterByPacket(getSendPacket());
 }
 
-void Ipv4DataStream::_send(const OctetVector &data) {
+void Ipv4DataStream::_send(OctetVector &&data) {
     // Update the ID before the sending.
     getSendPacket().setIdentification(Random::getMediumRandomNumber());
+    getSendPacket().importData(std::move(data));
 
-    getSendPacket().importData(data);
-
-    if(isFragmentionEnabled()) {
-        if(getMaximumSendDataLength() < data.size())
-            throw FragmentionNeeded{"Ipv4DataStream::_send"};
+    if(isFragmentionEnabled() == false) {
+        pl_assert(getMaximumSendDataLength() >= data.size());
 
         getSendPacket().setDontFragment(true);
         getPacketStream().sendPacket(getSendPacket());
     } else {
-        getPacketStream().sendWithFragmention(getSendPacket());
+        sendWithFragmention(getSendPacket());
     }
 
     getSendPacket().removeData();
 }
 
-void Ipv4DataStream::_recv(OctetVector &data) {
+OctetVector Ipv4DataStream::_recv() {
     if(mIsFragmentionEnabled) {
-        getPacketStream().receiveWithFragmention(getReceivePacket());
-        data = std::move(getReceivePacket().getVectorData());
+        if (receiveWithFragmention(getReceivePacket()) == false)
+            return OctetVector{};
+        else
+            return std::move(getReceivePacket().getVectorData());
     } else {
-        DataStreamUnderPacketStream::_recv(data);
+        return DataStreamUnderPacketStream::_recv();
     }
 }
 
@@ -97,9 +98,20 @@ bool Ipv4DataStream::isFragmentionEnabled() const
     return mIsFragmentionEnabled;
 }
 
-void Ipv4DataStream::setFragmentionStatus(bool status)
-{
+void Ipv4DataStream::setFragmentionStatus(bool status) {
+    if(mIsFragmentionEnabled != status) {
+        if(status == true)
+            mpFragmentReassemblers.reset(new Ipv4FragmentReassemblyManager{});
+        else
+            mpFragmentReassemblers.reset();
+    }
+
     mIsFragmentionEnabled = status;
+}
+
+void Ipv4DataStream::trySaveMemory()
+{
+    mpFragmentReassemblers->tryClearOldEntries();
 }
 
 struct Ipv4DataStreamFork : Ipv4DataStream::InternetProtocolFork{
@@ -114,6 +126,12 @@ struct Ipv4DataStreamFork : Ipv4DataStream::InternetProtocolFork{
     Ipv4Stream ipv4Stream;
     Ipv4DataStream ipv4DataStream;
 };
+
+
+InternetProtocol &Ipv4DataStreamFork::getInternetProtocol()
+{
+    return ipv4DataStream;
+}
 
 Ipv4DataStreamFork::Ipv4DataStreamFork(std::unique_ptr<LinkProtocol::LinkProtocolFork> &&linkProtocol,
                                        const Ipv4Address &destination,
@@ -237,10 +255,32 @@ std::unique_ptr<InternetProtocol::InternetProtocolFork> Ipv4DataStream::fork(boo
 //    }
 //}
 
-InternetProtocol &Ipv4DataStreamFork::getInternetProtocol()
-{
-    return ipv4DataStream;
+
+bool Ipv4DataStream::receiveWithFragmention(Ipv4Packet &packet) {
+    getPacketStream().receivePacket(packet);
+
+    if(Ipv4FragmentReassembler::isFragment(packet)) {
+        if(mpFragmentReassemblers->enterPacket(std::move(packet)) == false)
+            return false;
+    }
+
+    return true;
 }
+
+void Ipv4DataStream::sendWithFragmention(Ipv4Packet &packet) {
+    if(packet.getPacketLength() > getPacketStream().getDataStream().getMaximumSendDataLength()) {
+        auto fragments = Ipv4Fragmenter::fragmentPacket(packet, getPacketStream().getDataStream().getMaximumSendDataLength());
+
+        for(auto &fragment : fragments)
+        {
+            getPacketStream().sendPacket(fragment);
+        }
+    } else {
+        getPacketStream().sendPacket(packet);
+    }
+}
+
+
 
 } // Ipv4
 } // ProtocolLearn

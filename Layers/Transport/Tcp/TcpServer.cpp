@@ -42,20 +42,6 @@ TcpPacket TcpServer::receiveSyn() {
     return receivePacket;
 }
 
-//void TcpServer::sendSynAck(TcpStream &tcpStream, const TcpPacket &synPacket) {
-//    TcpPacket sendPacket;
-
-//    sendPacket.setSourcePort(mTcpStream.getTcpSession().our.port);
-//    sendPacket.setDestinationPort(synPacket.getSourcePort());
-//    sendPacket.setSequenceNumber(static_cast<uint16_t>(Random::getMediumRandomNumber()));
-//    sendPacket.setAcknowledgmentNumber(synPacket.getSequenceNumber()+1);
-//    sendPacket.setAcknowledgmentFlag(true);
-//    sendPacket.setSynFlag(true);
-//    sendPacket.setWindowSize(TcpDataStream::TEMP_WINDOW_SIZE);
-
-//    tcpStream.sendPacket(sendPacket); // send the SYN/ACK packet.
-//}
-
 void TcpServer::listen(uint16_t port) {
     mTcpStream.setTimeout(PTime::infinity()); // We can wait forever :)
     mTcpStream.getTcpSession().our.port = port;

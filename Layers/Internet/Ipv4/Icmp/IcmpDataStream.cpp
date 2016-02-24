@@ -41,10 +41,10 @@ IcmpDataStream::IcmpDataStream(IcmpStream &icmpStream, uint8_t type, uint8_t cod
     getPacketStream().getFilter().filterByPacket(mSendPacket);
 }
 
-void IcmpDataStream::sendData(const OctetVector &data) {
+void IcmpDataStream::sendData(OctetVector &&data) {
     mSendPacket.setSequence(mSendPacket.getSequence()+1);
 
-    DataStreamUnderPacketStream::sendData(data);
+    DataStreamUnderPacketStream::sendData(std::move(data));
 }
 
 // What a long name!
@@ -64,24 +64,24 @@ OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(co
         data.resize(minFailedData - ((minFailedData - maxSentData)/2), static_cast<uint8_t>('P'));
         pl_assert(data.size() != 0);
 
-        sendData(data);
+        sendData(std::move(data));
 
         try
         {
-            receiveData(data);
+            auto receivedData = receiveData();
+
+            // EPIC Programming time! BUUU HAAA!
+            if(getReceivePacket().getType() == ICMP_DEST_UNREACH && getReceivePacket().getCode() == ICMP_FRAG_NEEDED)
+                // We've got an EROOR! BUHAHAH!
+                minFailedData = data.size();
+            else
+                // We've got back the data, YOOOHOO! HAHHHHH!
+                maxSentData = data.size();
         } catch(Timeout::TimeoutException &) {
             ++failsCount; // "Security i- Oops, Hea, *Cyber* Security is one of our most important things"
 
             continue; // Try again.
         }
-
-        // EPIC Programming time! BUUU HAAA!
-        if(getReceivePacket().getType() == ICMP_DEST_UNREACH && getReceivePacket().getCode() == ICMP_FRAG_NEEDED)
-            // We've got an EROOR! BUHAHAH!
-            minFailedData = data.size();
-        else
-            // We've got back the data, YOOOHOO! HAHHHHH!
-            maxSentData = data.size();
     }
 
     return maxSentData;

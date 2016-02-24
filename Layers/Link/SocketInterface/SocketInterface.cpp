@@ -46,17 +46,21 @@ SocketInterface::SocketInterface(const Interface &interface)
     mSocket.bind(socketAddress);
 }
 
-void SocketInterface::_recv(OctetVector &data) {
-    try
-    {
+OctetVector SocketInterface::_recv() {
+    OctetVector data;
+
+    try{
         mSocket.receive(data, mInterface.getMTU(), 0);
+
     } catch(Socket::SocketException &e) {
         if(e.getErrorCode() == EWOULDBLOCK)
             throw Timeout::TimeoutException{"SocketInterface::_recv"};
     }
+
+    return data;
 }
 
-void SocketInterface::_send(const OctetVector &data) {
+void SocketInterface::_send(OctetVector &&data) {
     try
     {
         mSocket.send(data);

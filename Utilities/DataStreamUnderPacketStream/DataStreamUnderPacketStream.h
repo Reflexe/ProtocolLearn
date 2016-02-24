@@ -50,13 +50,13 @@ public:
     DataStreamUnderPacketStream(const DataStreamUnderPacketStream &) = delete;
     DataStreamUnderPacketStream &operator =(const DataStreamUnderPacketStream &) = delete;
 
-    virtual void _recv(OctetVector &data) override{
+    virtual OctetVector _recv() override{
         mPacketStream.receivePacket(mReceivePacket);
-        data = std::move(mReceivePacket.getVectorData());
+        return mReceivePacket.getVectorData();
     }
 
-    virtual void _send(const OctetVector &data) override{
-        mSendPacket.importData(data);
+    virtual void _send(OctetVector &&data) override{
+        mSendPacket.importData(std::move(data));
         mPacketStream.sendPacket(mSendPacket);
         mSendPacket.removeData();
     }

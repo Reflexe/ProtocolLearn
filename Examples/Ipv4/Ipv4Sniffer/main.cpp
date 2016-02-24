@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "SmartIpv4Stream.h"
-#include "Ipv4FragmentReassembler.h"
+#include "Ipv4FragmentReassemblyManager.h"
 
 using namespace ProtocolLearn;
 
@@ -188,40 +188,24 @@ int main(int argc, char *argv[]) {
     smartIpv4Stream.getIpv4Stream().getFilter().setPreviousPacketFilterStatus(false);
     smartIpv4Stream.getIpv4Stream().getFilter().setUserFilterStatus(true, filterCallback);
 
-    Ipv4FragmentReassembler fragmentReassembler;
-    bool isFragmentedPacketInProcess = false;
+    Ipv4FragmentReassemblyManager fragmentReassemblers;
 
     while(true) {
         smartIpv4Stream.getIpv4Stream().receivePacket(ipv4Packet);
 
-        if(isFragmentedPacketInProcess == false && Ipv4FragmentReassembler::isFirstFragment(ipv4Packet)) {
-            pl_crap("Found a first fragment!");
-
-            fragmentReassembler.reset(ipv4Packet);
-
-            isFragmentedPacketInProcess = true;
-        } else if (isFragmentedPacketInProcess == true && Ipv4FragmentReassembler::isFragment(ipv4Packet)
-                   && fragmentReassembler.isPacketRequired(ipv4Packet)) {
+        if (Ipv4FragmentReassembler::isFragment(ipv4Packet)) {
             pl_crap("Found a fragmented packet");
 
-            fragmentReassembler.insertPacket(ipv4Packet);
-
-            if(fragmentReassembler.isAllOffsetsFilled()) {
-                isFragmentedPacketInProcess = false;
-
+            if(fragmentReassemblers.enterPacket(std::move(ipv4Packet)) == true) {
                 std::cout << "Fragmented packet reassembled, details: " << std::endl;
-                filterCallback(fragmentReassembler.toPacket());
+                filterCallback(ipv4Packet);
             }
         }
 
-        if(isFragmentedPacketInProcess)
-            std::cout << "\tFragmented packet in process." << std::endl;
         if(Ipv4FragmentReassembler::isFirstFragment(ipv4Packet))
             std::cout << "\tFirst Fragment" << std::endl;
         if(Ipv4FragmentReassembler::isFragment(ipv4Packet))
             std::cout << "\tFragment" << std::endl;
-        if(fragmentReassembler.isPacketRequired(ipv4Packet))
-            std::cout << "\tRequired" << std::endl;
     }
 
     return 0;

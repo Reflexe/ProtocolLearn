@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
         std::string message = "DigitalWhisper!";
         ProtocolLearn::OctetVector octetVector{message.begin(), message.end()};
 
-        tcpIpv4DataStream.sendData(octetVector);
+        tcpIpv4DataStream.sendData(std::move(octetVector));
         tcpIpv4DataStream.sync();
     }
 

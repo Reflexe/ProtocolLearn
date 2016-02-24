@@ -149,14 +149,6 @@ private:
 
     void setInvalidPacket(ParsingError parsingError);
 
-//    /**
-//     * @brief Vector that contains the pseudo header.
-//     *
-//     * Ipv4 and Ipv6 has differnet Pseudo Header.  Therefore, this vector will
-//     * contain the data of the pseudo header.
-//     */
-//    OctetVector mPseudoHeader;
-
     TcpOptionsParser mOptionsParser;
     ParsingError mParsingError = ParsingError::None;
 };

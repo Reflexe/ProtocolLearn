@@ -40,15 +40,15 @@ public:
     VirtualDataStream();
     virtual ~VirtualDataStream() = default;
 
-    virtual void _send(const OctetVector &data) override;
-    virtual void _recv(OctetVector &data) override;
+    virtual void _send(OctetVector &&data) override;
+    virtual OctetVector _recv() override;
 
     /// Insert data to the recieve queue.
     void insertData(OctetVector &&data);
     void insertData(const OctetVector &data);
 
     /// Pop data from the send queue.
-    OctetVector popData();
+    OctetVector popSentData();
 
 private:
     std::queue<OctetVector> mReceiveQueue;

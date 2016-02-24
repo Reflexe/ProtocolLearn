@@ -44,14 +44,12 @@ public:
     }
 
     virtual void _recv(PacketType &packet) override{
-        OctetVector rawPacket;
-
-        mDataStream.receiveData(rawPacket);
+        auto rawPacket = mDataStream.receiveData();
 
         // Import data only if the data if at least the minmum header length.
-        pl_assert(rawPacket.size() >= packet.getMinimumHeaderLength());
+        pl_assert(rawPacket.size() >= PacketType::MinimumHeaderLength);
 
-        packet.fromRawPacket(rawPacket);
+        packet.fromRawPacket(std::move(rawPacket));
     }
 
     virtual void _send(PacketType &packet) override

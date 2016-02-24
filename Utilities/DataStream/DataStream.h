@@ -37,13 +37,13 @@ public:
     DataStream();
     virtual ~DataStream() = default;
 
-    virtual void sendData(const OctetVector &data);
-    virtual void receiveData(OctetVector &data);
+    virtual void sendData(OctetVector &&data);
+    virtual OctetVector receiveData();
 
-    void _receiveData(OctetVector &data);
+    OctetVector _receiveData();
 
-    virtual void _send(const OctetVector &data) = 0;
-    virtual void _recv(OctetVector &data) = 0;
+    virtual void _send(OctetVector &&data) = 0;
+    virtual OctetVector _recv() = 0;
 
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize);
     OctetVector::SizeType getMinimumReceiveDataSize() const;
@@ -53,12 +53,10 @@ public:
     const PTime &getTimeout() const;
 
 protected:
-    OctetVector::SizeType mMinimumReceiveDataSize;
-
     bool checkByMinimumReceiveDataSize(const OctetVector &data);
 
-private:
-    Timeout mTimeout;
+    OctetVector::SizeType mMinimumReceiveDataSize = 1;
+    Timeout mTimeout{PTime::infinity()};
 };
 
 } // ProtocolLearn

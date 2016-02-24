@@ -46,8 +46,8 @@ public:
     virtual void setTimeout(const Timeout::TimeType &time) override;
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize) override;
 
-    virtual void _recv(OctetVector &data) override;
-    virtual void _send(const OctetVector &data) override;
+    virtual OctetVector _recv() override;
+    virtual void _send(OctetVector &&data) override;
 
     DataStream &getDataStream() const;
 

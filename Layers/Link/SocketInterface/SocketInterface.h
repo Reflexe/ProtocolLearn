@@ -38,8 +38,8 @@ class SocketInterface : public BasicInterface
 public:
     SocketInterface(const Interface &interface);
 
-    virtual void _recv(OctetVector &data) override;
-    virtual void _send(const OctetVector &data) override;
+    virtual OctetVector _recv() override;
+    virtual void _send(OctetVector &&data) override;
 
     void setPromiscuousMode(bool status);
 

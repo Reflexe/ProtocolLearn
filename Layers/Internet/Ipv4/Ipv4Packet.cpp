@@ -7,23 +7,6 @@
 namespace ProtocolLearn {
 namespace Ipv4 {
 
-void Ipv4Packet::parseOptions() {
-    OctetVector::SizeType optionsLength = (getInternetHeaderLength()*4U) - Packet::getMinimumHeaderLength();
-
-    // Check if there's a place for the options.
-    if(getDataLength() < optionsLength)
-        return setInvalidPacket(ParsingError::NoPlaceForOptions);
-
-    OctetVector unrequiredHeader{getVectorData().cbegin(), getVectorData().cbegin()+optionsLength};
-
-    // Remove the options from the data.
-    getVectorData().erase(getVectorData().cbegin(), getVectorData().cbegin()+optionsLength);
-
-    // Get the options from the data (it's in the data because that it's outside the minimum header length range).
-    mOptionsParser.parse(unrequiredHeader);
-    importUnrequiredHeader(unrequiredHeader);
-}
-
 /**
  * @brief Ipv4Packet::updateChecksum  Update IP checksum in IP header.
  */
@@ -71,6 +54,15 @@ void Ipv4Packet::onPacketExport() {
     updateChecksum();
 }
 
+void Ipv4Packet::fromRawPacket(OctetVector &&rawPacket) {
+    OctetVector::SizeType headerSize = BitField<uint8_t>::getPosition<0, 4>(rawPacket.getAsObject<Ipv4Header>().versionAndHeaderLength) * 4;
+
+    if(headerSize > rawPacket.size() || headerSize < getMinimumHeaderLength())
+        return PacketWrapper::fromRawPacket(std::move(rawPacket), getMinimumHeaderLength());
+    else
+        return PacketWrapper::fromRawPacket(std::move(rawPacket), headerSize);
+}
+
 Ipv4Packet::Ipv4Packet() {
     setVersion(0x4);                 /* Version                */
 
@@ -112,21 +104,26 @@ bool Ipv4Packet::isChecksumValid() const{
 }
 
 void Ipv4Packet::onPacketImport() {
+    auto internetHeaderLength = getInternetHeaderLength();
+
+    // Just to check the new fromRawPacket function.
+    pl_assert(internetHeaderLength*4 == getHeaderLength());
+
     mParsingError = ParsingError::None;
 
     if(getVersion() != 4)
         return setInvalidPacket(ParsingError::InvalidVersion);
 
-    if(getInternetHeaderLength() < 5 || getInternetHeaderLength()*4U > Packet::getPacketLength())
+    if(internetHeaderLength < 5 || internetHeaderLength*4u != getHeaderLength())
         return setInvalidPacket(ParsingError::InvalidInternetHeaderLength);
 
     mMiniPacket.destination = ByteOrder::networkToHost(getHeader().destinationAddress);
     mMiniPacket.source = ByteOrder::networkToHost(getHeader().sourceAddress);
 
-    if(getInternetHeaderLength() > 5)
-        parseOptions();
+    if(internetHeaderLength > 5)
+        mOptionsParser.parse(getUnrequiredHeader());
     else
-        getParser().clearOptions();
+        mOptionsParser.clearOptions();
 }
 
 } // ProtocolLearn

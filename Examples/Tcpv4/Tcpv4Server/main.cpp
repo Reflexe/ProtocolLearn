@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     while(tcpDataStream.isConnected()) {
         pl_debug("Receiving data..");
         try {
-            tcpDataStream.receiveData(octetVector);
+            octetVector = tcpDataStream.receiveData();
         } catch(ProtocolLearn::Tcp::TcpDataStream::NotConnectedStream &) {
             break;
         }
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
         }
 
         pl_debug("Sending data back..");
-        tcpDataStream.sendData(octetVector);
+        tcpDataStream.sendData(std::move(octetVector));
 //        tcpDataStream.sync();
     }
 

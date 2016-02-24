@@ -65,12 +65,9 @@ public:
      * @brief Import packet from a vector.
      * @param rawPacket  Vector of bytes.
      */
-    void fromRawPacket(const OctetVector &rawPacket, const OctetVector::SizeType &headerLength);
+    void fromRawPacket(OctetVector &&rawPacket, OctetVector::SizeType headerLength);
 
-    void fromRawPacket(const OctetVector &rawPacket)
-    {
-        return fromRawPacket(rawPacket, getMinimumHeaderLength());
-    }
+    virtual void fromRawPacket(OctetVector &&rawPacket);
 
     void fromPacket(Packet &packet);
 

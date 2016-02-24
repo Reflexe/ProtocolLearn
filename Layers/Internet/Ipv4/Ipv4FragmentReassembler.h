@@ -39,15 +39,13 @@ public:
     Ipv4FragmentReassembler();
     Ipv4FragmentReassembler(const Ipv4Packet &firstPacket);
 
-    void reset(const Ipv4Packet &firstPacket);
-
     bool isPacketRequired(const Ipv4Packet &ipv4Packet) const;
 
-    void insertPacket(const Ipv4Packet &ipv4Packet);
+    void insertPacket(Ipv4Packet &&ipv4Packet);
 
     bool isAllOffsetsFilled();
 
-    Ipv4Packet toPacket() const;
+    Ipv4Packet &&toPacket();
 
     /**
      * @brief isFirstFragment  Returns true if the packet is a first fragment.

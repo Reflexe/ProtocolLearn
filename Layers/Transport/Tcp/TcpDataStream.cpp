@@ -97,37 +97,30 @@ TcpDataStream::TcpDataStream(TcpDataStream &&tcpDataStream)
     updateDropHandler(); // Yes. that's all.
 }
 
-void TcpDataStream::receiveData(OctetVector &data) {
-    if(mMinimumReceiveDataSize == 0)
-        return _recv(data);
+OctetVector TcpDataStream::receiveData() {
+    if(mMinimumReceiveDataSize == 1)
+        return _recv();
+
+    pl_assert(mMinimumReceiveDataSize < getYourTCB().window.getWindowSize());
 
     Timeout timeout{getTimeout(), true};
-    data.clear();
-    data.reserve(mMinimumReceiveDataSize);
 
-    do {
+    while(mReceiveQueue.getCurrentSize() < mMinimumReceiveDataSize) {
         if(timeout.isPassed())
             throw Timeout::TimeoutException{"TcpDataStream::receiveData"};
 
-        if(mReceiveQueue.empty()) {
-            checkIfStreamReadConnected("TcpDataStream::receiveData");
-            waitForPacket(TcpPacketType::DataPacket);
-        } else {
-            if(data.empty()) {
-                mReceiveQueue.pop_front(data);
-                getYourTCB().window.expendWindow(data.size());
-            } else {
-                OctetVector buffer;
-                mReceiveQueue.pop_front(buffer);
-                getYourTCB().window.expendWindow(buffer.size());
+        checkIfStreamReadConnected("TcpDataStream::receiveData");
+        waitForPacket(TcpPacketType::DataPacket);
+    }
 
-                data.add(buffer);
-            }
-        }
-    } while(data.size() < mMinimumReceiveDataSize);
+    OctetVector data{mReceiveQueue.pop_front()};
+    // We're expending the window only here: the requested data must not be greather than the window.
+    getYourTCB().window.expendWindow(data.size());
+
+    return data;
 }
 
-void TcpDataStream::_send(const OctetVector &data){
+void TcpDataStream::_send(OctetVector &&data){
     if(data.empty())
         return;
 
@@ -156,11 +149,11 @@ void TcpDataStream::_send(const OctetVector &data){
         } while(nextOctetToSend < data.cend());
 
     } else {
-        sendFragmentInWindow(data);
+        sendFragmentInWindow(std::move(data));
     }
 }
 
-void TcpDataStream::_recv(OctetVector &data) {
+OctetVector TcpDataStream::_recv() {
     if(mReceiveQueue.empty()) {
         Timeout timeout{getTimeout(), true};
 
@@ -173,8 +166,11 @@ void TcpDataStream::_recv(OctetVector &data) {
     }
 
     pl_assert(mReceiveQueue.empty() == false);
-    mReceiveQueue.pop_front(data);
+
+    OctetVector data{mReceiveQueue.pop_front()};
     getYourTCB().window.expendWindow(static_cast<uint32_t>(data.size()));
+
+    return data;
 }
 
 void TcpDataStream::setTimeout(const Timeout::TimeType &time)
@@ -270,28 +266,18 @@ OctetVector::SizeType TcpDataStream::getMaximumSendDataLength() {
                     OctetVector::SizeType{getOurTCB().window.getCurrentWindowSize()});
 }
 
-//OctetVector::SizeType TcpDataStream::getMaximumTransmissionUnit()
-//{
-//    return getPacketStream().getPacketStream().getDataStream().getMaximumSendDataLength();
-//}
-
-//void TcpDataStream::updateSendWindow(OctetVector::SizeType segementSize) {
-//    pl_assert(segementSize <= getOurTCB().windowSize);
-//    getOurTCB().windowSize -= segementSize;
-//}
-
-void TcpDataStream::sendFragment(const OctetVector &octetVector, uint32_t sequenceNumber) {
+void TcpDataStream::sendFragment(OctetVector &&octetVector, uint32_t sequenceNumber) {
     updateSendPacket(true, sequenceNumber);
-    DataStreamUnderPacketStream::_send(octetVector);
+    DataStreamUnderPacketStream::_send(std::move(octetVector));
 }
 
-void TcpDataStream::sendFragmentInWindow(const OctetVector &octetVector) {
+void TcpDataStream::sendFragmentInWindow(OctetVector &&octetVector) {
     mRetransmitQueue.push(RetransmitQueue::SavedData{TcpPacketType::DataPacket,
                                                      getOurTCB().window.createSequenceNumber(static_cast<uint32_t>(getOurTCB().window.getNextSequence() + octetVector.size())),
                                                      octetVector,
                                                      Timeout{mRetransmitionTimeout, true}});
 
-    sendFragment(octetVector, getOurTCB().window.getBegin());
+    sendFragment(std::move(octetVector), getOurTCB().window.getBegin());
 }
 
 void TcpDataStream::sendPacket(TcpDataStream::TcpPacketType packetType, uint32_t sequenceNumber) {
@@ -344,7 +330,8 @@ void TcpDataStream::retransmitPackets() {
         auto &savedData = mRetransmitQueue.front();
 
         if(savedData.tcpPacketType == TcpPacketType::DataPacket)
-            sendFragment(savedData.data, static_cast<uint32_t>(savedData.expectedAcknowledgmentNumber.to32BitInteger()-savedData.data.size()));
+            sendFragment(std::move(savedData.data),
+                         static_cast<uint32_t>(savedData.expectedAcknowledgmentNumber.to32BitInteger()-savedData.data.size()));
         else
             sendPacket(savedData.tcpPacketType, savedData.expectedAcknowledgmentNumber.to32BitInteger()-1);
 
@@ -422,13 +409,6 @@ void TcpDataStream::initPorts(uint16_t destinationPort, uint16_t sourcePort) {
 
 void TcpDataStream::updateSendPacket(bool acknowledgmentFlag, uint32_t sequenceNumber) {
     mSendPacket.setSequenceNumber(sequenceNumber);
-
-//    auto oldestUnreceivedSeqeunceNumber = mReceiveQueue.getOldestSequenceNumber();
-//    if(oldestUnreceivedSeqeunceNumber == 0)
-//        mSendPacket.setWindowSize(TEMP_WINDOW_SIZE);
-//    else {
-//        mSendPacket.setWindowSize((TEMP_WINDOW_SIZE - (getYourTCB().window.getNextSequence() - oldestUnreceivedSeqeunceNumber)) >> getOurTCB().windowShift);
-//    }
 
     mSendPacket.setWindowSize(static_cast<uint16_t>(getYourTCB().window.getCurrentWindowSize() >> getYourTCB().windowShift));
 
@@ -584,52 +564,27 @@ TcpDataStream::ReceiveQueue::ReceiveQueue()
 
 void TcpDataStream::ReceiveQueue::push(OctetVector &&octetVector, const TcpSequenceNumber &tcpSequenceNumber) {
     pl_assert(octetVector.empty() == false);
-//    mReceiveMap[tcpSequenceNumber] = std::move(octetVector);
 
     if(tcpSequenceNumber != mNextSequenceNumber) {
         mReceiveMap[tcpSequenceNumber] = std::move(octetVector);
-    } else if(mReceiveMap.empty()) {
-        pl_assert(tcpSequenceNumber == mNextSequenceNumber);
-        addToReceiveBuffer(std::move(octetVector));
     } else {
         pl_assert(tcpSequenceNumber == mNextSequenceNumber);
         addToReceiveBuffer(std::move(octetVector));
-        mergeReceiveMapToReceiveBuffer();
+
+        if (mReceiveMap.empty() == false)
+            mergeReceiveMapToReceiveBuffer();
     }
 }
 
-void TcpDataStream::ReceiveQueue::pop_front(OctetVector &octetVector) {
-//    pl_assert(empty() == false);
-//    octetVector.clear();
-
-//    auto iterator = mReceiveMap.begin();
-//    uint32_t nextSequenceNumber = mOldestSequenceNumber;
-
-//    while(iterator != mReceiveMap.end()) {
-//        if(iterator->first != nextSequenceNumber)
-//            break;
-
-//        auto &savedOctetVector = iterator->second;
-//        nextSequenceNumber += savedOctetVector.size();
-
-//        if(octetVector.empty())
-//            octetVector = std::move(savedOctetVector);
-//        else
-//            octetVector.insert(octetVector.end(), savedOctetVector.begin(), savedOctetVector.end());
-
-//        iterator = mReceiveMap.erase(iterator);
-//    }
-
-//    mOldestSequenceNumber = nextSequenceNumber;
-
+OctetVector TcpDataStream::ReceiveQueue::pop_front() {
     pl_assert(empty() == false);
-    octetVector.clear();
-    octetVector = std::move(mReceiveBuffer);
+    mCurrentSize = 0;
+
+    return joinReceiveBuffer();
 }
 
-bool TcpDataStream::ReceiveQueue::empty() const{
-//    return mReceiveMap.empty() || mReceiveMap.begin()->first != mOldestSequenceNumber;
-
+bool TcpDataStream::ReceiveQueue::empty() const
+{
     return mReceiveBuffer.empty();
 }
 
@@ -646,6 +601,24 @@ void TcpDataStream::ReceiveQueue::mergeReceiveMapToReceiveBuffer() {
     }
 }
 
+OctetVector TcpDataStream::ReceiveQueue::joinReceiveBuffer() {
+    OctetVector data{std::move(mReceiveBuffer.front())};
+    mReceiveBuffer.pop_front();
+    data.reserve(mCurrentSize);
+
+    for(auto &octetVector : mReceiveBuffer)
+    {
+        data.add(octetVector);
+    }
+
+    return data;
+}
+
+OctetVector::SizeType TcpDataStream::ReceiveQueue::getCurrentSize() const
+{
+    return mCurrentSize;
+}
+
 void TcpDataStream::ReceiveQueue::setNextSequenceNumber(const uint32_t &nextSequenceNumber)
 {
     mNextSequenceNumber = nextSequenceNumber;
@@ -658,7 +631,8 @@ uint32_t TcpDataStream::ReceiveQueue::getNextSequenceNumber()
 
 void TcpDataStream::ReceiveQueue::addToReceiveBuffer(OctetVector &&octetVector) {
     mNextSequenceNumber += octetVector.size();
-    mReceiveBuffer.add(std::move(octetVector));
+    mCurrentSize += octetVector.size();
+    mReceiveBuffer.push_back(std::move(octetVector));
 }
 
 } // Tcp

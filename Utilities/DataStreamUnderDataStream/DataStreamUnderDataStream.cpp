@@ -32,14 +32,14 @@ DataStreamUnderDataStream::DataStreamUnderDataStream(ProtocolLearn::DataStream &
 {
 }
 
-void DataStreamUnderDataStream::_recv(OctetVector &data)
+OctetVector DataStreamUnderDataStream::_recv()
 {
-    dataStream.receiveData(data);
+    return dataStream.receiveData();
 }
 
-void DataStreamUnderDataStream::_send(const OctetVector &data)
+void DataStreamUnderDataStream::_send(OctetVector &&data)
 {
-    dataStream.sendData(data);
+    dataStream.sendData(std::move(data));
 }
 
 DataStream &DataStreamUnderDataStream::getDataStream() const

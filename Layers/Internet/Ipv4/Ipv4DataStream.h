@@ -26,6 +26,9 @@
 #ifndef IPV4DATASTREAM_H
 #define IPV4DATASTREAM_H
 
+#include <unordered_map>
+#include <memory>
+
 #include "DataStreamUnderPacketStream.h"
 
 #include "Ipv4Stream.h"
@@ -34,6 +37,7 @@
 
 #include "VirtualDataStream.h"
 #include "IcmpStream.h"
+#include "Ipv4FragmentReassemblyManager.h"
 
 namespace ProtocolLearn {
 namespace Ipv4 {
@@ -49,8 +53,8 @@ public:
         using RuntimeError::RuntimeError;
     };
 
-    virtual void _send(const OctetVector &data) override final;
-    virtual void _recv(OctetVector &data) override final;
+    virtual void _send(OctetVector &&data) override final;
+    virtual OctetVector _recv() override final; 
 
     virtual OctetVector::SizeType getMaximumSendDataLength() override final;
     virtual OctetVector::SizeType getRealMaximumSendDataLength() override final;
@@ -58,18 +62,20 @@ public:
     bool isFragmentionEnabled() const;
     void setFragmentionStatus(bool status);
 
+    void trySaveMemory();
+
     virtual std::unique_ptr<InternetProtocolFork> fork(bool reply=false) override;
 private:
+    bool receiveWithFragmention(Ipv4Packet &packet);
+    void sendWithFragmention(Ipv4Packet &packet);
 
-//    void onPacketDropped(Ipv4Packet &packet, Ipv4Stream::FilterType::DropReasonType dropReason);
-//    void handleIcmpErrorPacket(Ipv4Packet &ipv4Packet);
-//    void handleDestinationUnrechable(const Icmp::IcmpPacket &icmpPacket);
+    //    void onPacketDropped(Ipv4Packet &packet, Ipv4Stream::FilterType::DropReasonType dropReason);
+    //    void handleIcmpErrorPacket(Ipv4Packet &ipv4Packet);
+    //    void handleDestinationUnrechable(const Icmp::IcmpPacket &icmpPacket);
 
     bool mIsFragmentionEnabled = false;
-//    OctetVector::SizeType mMaximumPacketSize = getMaximumSendDataLength();
+    std::unique_ptr<Ipv4FragmentReassemblyManager> mpFragmentReassemblers;
 
-//    VirtualDataStream mVirtualDataStream;
-//    Icmp::IcmpStream mIcmpErrorsStream;
 };
 
 } // Ipv4

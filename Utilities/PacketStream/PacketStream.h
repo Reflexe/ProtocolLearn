@@ -111,6 +111,7 @@ public:
      * @note Use _send() to send a packet without filter update.
      */
     virtual void sendPacket(PacketType &packet) {
+        // The packet may change here, therefore, we're calling filterByPacket() before.
         _send(packet);
 
         mProtocolFilter.filterByPacket(packet);
@@ -167,7 +168,7 @@ private:
     Timeout mTimeout{0, 0};
 
     /**
-     * @brief Called when packet dropped (called by
+     * @brief Called when packet dropped.
      *
      * Some protocols (eg. TCP) requires an action on dropping a packet
      * (eg. sending of a RST packet)

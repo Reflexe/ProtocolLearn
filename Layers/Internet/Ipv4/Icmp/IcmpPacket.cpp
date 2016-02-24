@@ -36,7 +36,7 @@ IcmpPacket::IcmpPacket()
 
 Ipv4::Ipv4Packet IcmpPacket::getOriginalDatagram() const{
     Ipv4::Ipv4Packet ipv4Packet;
-    ipv4Packet.fromRawPacket(getVectorData());
+    ipv4Packet.fromRawPacket(OctetVector{getVectorData()});
     return ipv4Packet;
 }
 

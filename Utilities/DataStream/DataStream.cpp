@@ -28,20 +28,19 @@
 namespace ProtocolLearn {
 
 DataStream::DataStream()
-    : mMinimumReceiveDataSize(0), mTimeout{0, 0}
 {
 }
 
-void DataStream::sendData(const OctetVector &data)
+void DataStream::sendData(OctetVector &&data)
 {
-    _send(data);
+    _send(std::move(data));
 }
 
-void DataStream::receiveData(OctetVector &data) {
+OctetVector DataStream::receiveData() {
     auto timeToWait = mTimeout.getTimeToWait();
 
     try {
-        _receiveData(data);
+        return _receiveData();
     } catch(...) {
         // Restore the original time.
         if(getTimeout() != timeToWait)
@@ -55,15 +54,15 @@ void DataStream::receiveData(OctetVector &data) {
         setTimeout(timeToWait);
 }
 
-void DataStream::_receiveData(OctetVector &data) {
+OctetVector DataStream::_receiveData() {
     mTimeout.start();
 
     do {
-        _recv(data);
+        auto data = _recv();
 
         pl_debug("checkByMinimumReceiveDataSize: " << (checkByMinimumReceiveDataSize(data) ? "Passed" : "Success"));
        if (checkByMinimumReceiveDataSize(data) == true)
-           return;
+           return data;
 
        if (mTimeout.isPassed())
            throw Timeout::TimeoutException("DataStream::receiveData");

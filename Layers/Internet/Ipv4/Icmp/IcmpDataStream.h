@@ -42,7 +42,7 @@ class IcmpDataStream : public DataStreamUnderPacketStream<IcmpStream, BasicProto
 public:
     IcmpDataStream(IcmpStream &icmpStream, uint8_t type, uint8_t code=0);
 
-    virtual void sendData(const OctetVector &data) override final;
+    virtual void sendData(OctetVector &&data) override final;
 
     OctetVector::SizeType performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy, const uint16_t maxFails);
 };

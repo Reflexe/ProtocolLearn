@@ -41,43 +41,36 @@ Ipv4FragmentReassembler::Ipv4FragmentReassembler(const Ipv4Packet &firstPacket)
     mFirstPacket.removeData();
 }
 
-void Ipv4FragmentReassembler::reset(const Ipv4Packet &firstPacket) {    
-    pl_assert(firstPacket.getFragmentOffset() == 0);
-
-    mLastOffset = 0;
-    mTotalLength = 0;
-
-    mFirstPacket = firstPacket;
-
-    mOffsetsAndDatas[0] = std::move(mFirstPacket.getVectorData());
-
-    mFirstPacket.removeData();
-}
-
 bool Ipv4FragmentReassembler::isPacketRequired(const Ipv4Packet &ipv4Packet) const{
-    return mFirstPacket.getDestination() == ipv4Packet.getDestination()
-            && mFirstPacket.getSource() == ipv4Packet.getSource()
-            && mFirstPacket.getIdentification() == ipv4Packet.getIdentification()
-            && mFirstPacket.getProtocol() == ipv4Packet.getProtocol()
-            && (ipv4Packet.getDataLength() % 8 == 0
-                || (ipv4Packet.getMoreFragmentsFlag() == false && mLastOffset == 0)) /* The last fragment doesn't must be 8 byte aligned */
-            && ipv4Packet.getFragmentOffset() != 0 /* We already received the first fragment */
-            && mOffsetsAndDatas.count(ipv4Packet.getFragmentOffset()) == 0;
-//            && isValidOffset(ipv4Packet.getFragmentOffset(), ipv4Packet.getDataLength());
+    return (ipv4Packet.getDataLength() % 8 == 0
+            || (ipv4Packet.getMoreFragmentsFlag() == false && mLastOffset == 0)); /* The last fragment doesn't must be 8 byte aligned */
 }
 
-void Ipv4FragmentReassembler::insertPacket(const Ipv4Packet &ipv4Packet) {
-    const auto &offset = ipv4Packet.getFragmentOffset();
+void Ipv4FragmentReassembler::insertPacket(Ipv4Packet &&ipv4Packet) {
+    auto offset = ipv4Packet.getFragmentOffset();
 
-    // You must call isPacketRequired before.
-    pl_assert(mOffsetsAndDatas.count(offset) == 0);
+    // We're checking if we got duplicate offsets.
+    if(mOffsetsAndDatas.emplace(offset, std::move(ipv4Packet.getVectorData())).second == false) {
+        pl_strange("Duplicate offsets");
 
-    mOffsetsAndDatas[offset] = ipv4Packet.getVectorData();
+        return;
+    }
+
+    if(isFirstFragment(ipv4Packet)) {
+        pl_crap("first fragment found");
+
+        mFirstPacket = std::move(ipv4Packet);
+    }
 
     if(ipv4Packet.getMoreFragmentsFlag() == false) {
-        pl_crap("last fragment found");
+        if(mLastOffset != 0) {
+            pl_strange("We already found the packet for the end, WTF?");
 
-        pl_assert(mLastOffset == 0);
+            return;
+        }
+
+        pl_crap("last fragment found");        
+
         mLastOffset = offset;
         mTotalLength = (mLastOffset*8) + ipv4Packet.getDataLength();
     }
@@ -114,22 +107,19 @@ bool Ipv4FragmentReassembler::isAllOffsetsFilled() {
     return false;
 }
 
-Ipv4Packet Ipv4FragmentReassembler::toPacket() const{
-    OctetVector data;
+Ipv4Packet &&Ipv4FragmentReassembler::toPacket() {
+    OctetVector data{};
+    data.reserve(mTotalLength);
 
     for(const auto &offsetAndData : mOffsetsAndDatas)
     {
-        data.add(offsetAndData.second);
+        data.add(std::move(offsetAndData.second));
     }
 
-    Ipv4Packet ipv4Packet = mFirstPacket;
-    ipv4Packet.importData(data);
+    mFirstPacket.importData(data);
+    mFirstPacket.setMoreFragments(false);
 
-    pl_assert(ipv4Packet.isValidPacket() == true);
-
-    ipv4Packet.setMoreFragments(false);
-
-    return ipv4Packet;
+    return std::move(mFirstPacket);
 }
 
 bool Ipv4FragmentReassembler::isFirstFragment(const Ipv4Packet &ipv4Packet)

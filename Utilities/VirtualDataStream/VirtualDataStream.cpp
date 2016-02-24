@@ -28,22 +28,22 @@ namespace ProtocolLearn {
 
 VirtualDataStream::VirtualDataStream()
 {
-
 }
 
-void VirtualDataStream::_send(const OctetVector &data)
+void VirtualDataStream::_send(OctetVector &&data)
 {
-    mSendQueue.push(OctetVector{data});
+    mSendQueue.push(std::move(data));
 }
 
-void VirtualDataStream::_recv(OctetVector &data) {
-    if(mReceiveQueue.empty()) {
-        data.clear();
-        return;
-    }
+OctetVector VirtualDataStream::_recv() {
+    pl_assert(mReceiveQueue.empty() == false);
+    if (mReceiveQueue.empty())
+        return OctetVector{};
 
-    data = std::move(mReceiveQueue.front());
-    mReceiveQueue.front();
+    OctetVector octetVector = std::move(mReceiveQueue.front());
+    mReceiveQueue.pop();
+
+    return octetVector;
 }
 
 void VirtualDataStream::insertData(OctetVector &&data)
@@ -56,9 +56,10 @@ void VirtualDataStream::insertData(const OctetVector &data)
     mReceiveQueue.push(OctetVector{data});
 }
 
-OctetVector VirtualDataStream::popData() {
+OctetVector VirtualDataStream::popSentData() {
     OctetVector octetVector = std::move(mSendQueue.front());
     mSendQueue.pop();
+
     return octetVector;
 }
 

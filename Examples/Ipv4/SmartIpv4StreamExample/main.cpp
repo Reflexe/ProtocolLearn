@@ -74,10 +74,6 @@ int main(int argc, char *argv[]) {
 
     SmartIpv4Stream smartIpv4Stream{ipv4Packet.getDestination()};
 
-    Ipv4DataStream ipv4DataStream{smartIpv4Stream.getIpv4Stream()};
-
-    ipv4DataStream.performMTUPathDiscovery();
-
     smartIpv4Stream.getIpv4Stream().sendPacket(ipv4Packet);
 
     return 0;

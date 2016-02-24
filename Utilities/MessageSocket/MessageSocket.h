@@ -36,14 +36,14 @@ class MessageSocket : public DataStream
 public:
     explicit MessageSocket(int protocol);
 
-    void sendMessage(const ::std::vector<uint8_t> &data) const;
+    void sendMessage(const OctetVector &data) const;
     void receiveMessage(::std::vector<uint8_t> &data) const;
 
     size_t recvmsg(msghdr &msgHeader) const;
     size_t sendmsg(const msghdr &msgHeader) const;
 
-    virtual void _recv(OctetVector &data) override;
-    virtual void _send(const OctetVector &data) override;
+    virtual OctetVector _recv() override;
+    virtual void _send(OctetVector &&data) override;
 
     virtual void setTimeout(const Timeout::TimeType &timeout) override;
 

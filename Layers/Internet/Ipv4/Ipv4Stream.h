@@ -29,11 +29,6 @@ public:
 //     * @note If you want to handle fragmention by yourself, use the sendFragment function.
 //     */
 //    virtual void sendPacket(Ipv4Packet &packet) override;
-
-    void receiveWithFragmention(Ipv4Packet &packet);
-    void sendWithFragmention(Ipv4Packet &packet);
-
-    void receiveFragmentedPacket(const Ipv4Packet &firstPacket, Ipv4Packet &packetToReceive);
 };
 
 } // ProtocolLearn

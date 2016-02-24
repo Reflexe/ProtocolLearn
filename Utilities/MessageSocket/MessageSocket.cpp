@@ -50,7 +50,7 @@ MessageSocket::MessageSocket(int protocol)
 {
 }
 
-void MessageSocket::sendMessage(const std::vector<uint8_t> &data) const{
+void MessageSocket::sendMessage(const OctetVector &data) const{
     msghdr msgHeader;
     iovec iove;
 
@@ -91,12 +91,13 @@ void MessageSocket::receiveMessage(std::vector<uint8_t> &data) const{
     data.resize(recvmsg(msgHeader));
 }
 
-void MessageSocket::_recv(OctetVector &data)
-{
+OctetVector MessageSocket::_recv() {
+    OctetVector data;
     receiveMessage(data);
+    return data;
 }
 
-void MessageSocket::_send(const OctetVector &data)
+void MessageSocket::_send(OctetVector &&data)
 {
     sendMessage(data);
 }

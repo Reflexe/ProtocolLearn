@@ -31,48 +31,6 @@
 
 namespace ProtocolLearn {
 
-//template<typename PacketStreamType>
-//class PacketStreamUnderPacketStream {
-//public:
-//    PacketStreamUnderPacketStream(PacketStreamType &packetStream)
-//        : mPacketStream{packetStream}
-//    {
-//    }
-
-//    virtual void _recv(typename PacketStreamType::PacketType &packet)
-//    {
-//        mPacketStream._recv(packet);
-//    }
-
-//    virtual void _send(typename PacketStreamType::PacketType &packet)
-//    {
-//        return mPacketStream._send(packet);
-//    }
-
-//    virtual void sendPacket(typename PacketStreamType::PacketType &packet)
-//    {
-//        return mPacketStream.sendPacket(packet);
-//    }
-
-//    virtual void receivePacket(typename PacketStreamType::PacketType &packet)
-//    {
-//        return mPacketStream.receivePacket(packet);
-//    }
-
-//    const PTime::TimeVal &getTimeout() const{ return mPacketStream.getTimeout(); }
-
-//    typename PacketStreamType::FilterType &getFilter() { return mPacketStream.getFilter(); }
-//    const typename PacketStreamType::FilterType &getFilter() const{ return mPacketStream.getFilter(); }
-
-//    void setDropHandler(const typename PacketStreamType::DropHandlerType &dropHandler=PacketStreamType::defaultDropHandler)
-//    {
-//        return mPacketStream.setDropHandler(dropHandler);
-//    }
-
-//private:
-//    PacketStreamType &mPacketStream;
-//};
-
 class InternetProtocol : public BasicProtocol
 {
 public:
