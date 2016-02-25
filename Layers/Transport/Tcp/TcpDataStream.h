@@ -73,6 +73,7 @@ public:
     };
 
     static const uint32_t TEMP_WINDOW_SIZE = 0xffff;
+    static const OctetVector::SizeType MinimumWriteWindowSize = 0xff;
 
 private:
     TcpDataStream(TcpStream &tcpStream, uint16_t destinationPort, uint16_t sourcePort);

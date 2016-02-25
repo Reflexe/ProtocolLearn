@@ -75,15 +75,10 @@ bool TcpFilter::isValidAcknowledmentNumber(const TcpFilter::TcpTransmissionContr
     return TCB.window.isInAcknowledgmentWindow(acknowledgmentNumber);
 }
 
-void TcpFilter::updateWindowSize(uint16_t packetWindowSize, TcpFilter::TcpTransmissionControlBlock &TCB) {
-    // SECURIT: such a nice DDOS! just send a little pichky WS! @see TcpDataStream::sendDataPacket.
+void TcpFilter::updateWindowSize(uint16_t packetWindowSize, TcpFilter::TcpTransmissionControlBlock &TCB)
+{
     TCB.window.updateWindow(packetWindowSize << TCB.windowShift);
 }
-
-//void TcpFilter::updateSequence(uint32_t sequenceNumber, OctetVector::SizeType segementLength, TcpFilter::TcpTransmissionControlBlock &TCB)
-//{
-//    TCB.nextSequence = sequenceNumber + segementLength;
-//}
 
 void TcpFilter::updateLastAcknowledgment(uint32_t acknowledgmentNumber, TcpFilter::TcpTransmissionControlBlock &TCB)
 {
@@ -148,8 +143,6 @@ TcpFilter::DropReasonType TcpFilter::successUpdate(uint32_t sequenceNumber, uint
 /**
  * @brief TcpFilter::checkByPreviousPacket
  * @param filteredPacket
- * @todo save resources and get in the start some useful information
- *       about the packet (instead of getting it again and again).
  * @return
  *
  * The Tcp Handshake:
@@ -211,7 +204,6 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
         if(isValidAcknowledmentNumber(mTcpSession.our, filteredPacket.getAcknowledgmentNumber()) == false)
             return InvalidAcknowledgment;
 
-//        auto acknowledgmentNumber = filteredPacket.getAcknowledgmentNumber();
         if(mTcpSession.our.window.willBeSynced(filteredPacket.getAcknowledgmentNumber()) == false)
             return SyncedAcknowledgmentRequired;
 
@@ -245,7 +237,7 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
     if(isValidAcknowledmentNumber(mTcpSession.our, acknowledgmentNumber) == false)
         return InvalidAcknowledgment;
 
-    // It's not actualy what the standrart says about SynReceived (setTcpState(Listen)), but this is a new stream.
+    // This is not actualy what the standrart says about SynReceived (setTcpState(Listen)), but this is a new stream.
     // @see Network Notes:4 for more information about the second part of the condition.
     if(filteredPacket.getResetFlag() && segementLength == 0) {
         setTcpState(Closed);

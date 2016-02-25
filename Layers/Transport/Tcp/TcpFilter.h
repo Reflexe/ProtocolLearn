@@ -94,49 +94,10 @@ public:
     explicit TcpFilter(TcpState initialState=Closed);
 
     struct TcpTransmissionControlBlock {
-//        void init() { port = windowSize = windowShift = 0; }
-
         /**
          * @brief The source port in the packets.
          */
         uint16_t port = 0;
-
-//        /**
-//         * @brief The sequence number field in the next packet.
-//         *
-//         * The combination of our first sequence number and the octets sent.
-//         */
-//        uint32_t nextSequence = 0;
-
-//        /**
-//         * @brief The acknowledgment number in the last packet (the last packet of the other TCB)
-//         *
-//         * The oldest unacknowledgmented sequence number.
-//         */
-//        uint32_t lastAcknowledgment = 0;
-
-//        /**
-//         * @brief The window size of the other TCB: How much octets this side can send without another permission.
-//         */
-//        uint32_t windowSize = 0;
-
-//        bool isSynced() const
-//        {
-//            return lastAcknowledgment == nextSequence;
-//        }
-
-//        bool willBeSynced(uint32_t acknowledgmentNumber) const
-//        {
-//            return acknowledgmentNumber == nextSequence;
-//        }
-
-//        bool isInWindow(uint32_t sequence) const;
-//        bool isInAcknowledgmentWindow(uint32_t acknowledgment) const;
-
-//        TcpSequenceNumber createSequenceNumber();
-//        TcpSequenceNumber createSequenceNumber(uint32_t sequenceNumber);
-//        TcpSequenceNumber createAcknowledgmentNumber();
-//        TcpSequenceNumber createAcknowledgmentNumber(uint32_t acknowledgmentNumber);
 
         TcpSequenceNumber::TcpSequenceWindow window;
         uint8_t windowShift = 0;
@@ -173,7 +134,6 @@ private:
     static bool isValidAcknowledmentNumber(const TcpTransmissionControlBlock &TCB, uint32_t acknowledgmentNumber);
     static void updateWindowSize(uint16_t packetWindowSize, TcpTransmissionControlBlock &TCB);
 
-//    void updateSequence(uint32_t sequenceNumber, OctetVector::SizeType segementLength, TcpTransmissionControlBlock &TCB);
     void updateLastAcknowledgment(uint32_t acknowledgmentNumber, TcpTransmissionControlBlock &TCB);
     void initTCB(const TcpPacket &packet, TcpTransmissionControlBlock &TCB, TcpTransmissionControlBlock &anotherTCB);
     static void initWindowShift(const TcpPacket &packet, TcpTransmissionControlBlock &TCB, TcpTransmissionControlBlock &anotherTCB,

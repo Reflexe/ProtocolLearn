@@ -396,7 +396,9 @@ void TcpDataStream::checkIfStreamReadConnected(const char functionName[]) {
 }
 
 void TcpDataStream::checkIfStreamWriteConnected(const char functionName[]) {
-    if(getOurTCB().window.getCurrentWindowSize() == 0 || (isConnected() == false && getTcpState() != TcpFilter::CloseWait))
+    // Prevent ddos.
+    if(getOurTCB().window.getCurrentWindowSize() < MinimumWriteWindowSize
+            || (isConnected() == false && getTcpState() != TcpFilter::CloseWait))
         throw NotConnectedStream{functionName};
 }
 
