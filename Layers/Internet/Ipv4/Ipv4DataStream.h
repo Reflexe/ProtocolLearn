@@ -35,8 +35,6 @@
 
 #include "InternetProtocol.h"
 
-#include "VirtualDataStream.h"
-#include "IcmpStream.h"
 #include "Ipv4FragmentReassemblyManager.h"
 
 namespace ProtocolLearn {
@@ -68,10 +66,6 @@ public:
 private:
     bool receiveWithFragmention(Ipv4Packet &packet);
     void sendWithFragmention(Ipv4Packet &packet);
-
-    //    void onPacketDropped(Ipv4Packet &packet, Ipv4Stream::FilterType::DropReasonType dropReason);
-    //    void handleIcmpErrorPacket(Ipv4Packet &ipv4Packet);
-    //    void handleDestinationUnrechable(const Icmp::IcmpPacket &icmpPacket);
 
     bool mIsFragmentionEnabled = false;
     std::unique_ptr<Ipv4FragmentReassemblyManager> mpFragmentReassemblers;

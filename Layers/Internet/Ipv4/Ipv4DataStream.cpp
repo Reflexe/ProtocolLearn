@@ -36,12 +36,12 @@
 namespace ProtocolLearn {
 namespace Ipv4 {
 
-Ipv4DataStream::Ipv4DataStream(Ipv4Stream &ipv4Stream, const Ipv4Address &destination, uint8_t protocol, const Ipv4Address &source, bool enableFragmention)
+Ipv4DataStream::Ipv4DataStream(Ipv4Stream &ipv4Stream, const Ipv4Address &destination,
+                               uint8_t protocol, const Ipv4Address &source,
+                               bool enableFragmention)
     : DataStreamUnderPacketStream{ipv4Stream},
-      mIsFragmentionEnabled{enableFragmention} {
-//    getPacketStream().setDropHandler(std::bind(&Ipv4DataStream::onPacketDropped, this, std::placeholders::_1, std::placeholders::_2));
-
-//    mIcmpErrorsStream.setTimeout(PTime::zero());
+      mIsFragmentionEnabled{enableFragmention},
+      mpFragmentReassemblers{enableFragmention ? new Ipv4FragmentReassemblyManager{} : nullptr} {
 
     getSendPacket().setDestination(destination);
     getSendPacket().setSource(source);
@@ -109,8 +109,8 @@ void Ipv4DataStream::setFragmentionStatus(bool status) {
     mIsFragmentionEnabled = status;
 }
 
-void Ipv4DataStream::trySaveMemory()
-{
+void Ipv4DataStream::trySaveMemory() {
+    pl_assert(isFragmentionEnabled());
     mpFragmentReassemblers->tryClearOldEntries();
 }
 
@@ -157,105 +157,6 @@ std::unique_ptr<InternetProtocol::InternetProtocolFork> Ipv4DataStream::fork(boo
                     isFragmentionEnabled()}};
 }
 
-//// TODO: test this.
-//// TODO: Handle MTU changes (Or just use a constant MTU).
-//void Ipv4DataStream::performMTUPathDiscovery() {
-//    bool isFragmentionEnbaled = isFragmentionEnabled();
-//    setFragmentionStatus(false);
-
-//    OctetVector::SizeType maxSentData = 0;
-//    OctetVector::SizeType minFailedData = (getMaximumSendDataLength()-Icmp::IcmpPacket::MinimumHeaderLength)+MtuAccurecy;
-//    Icmp::IcmpDataStream icmpDataStream{mIcmpErrorsStream, ICMP_ECHO};
-
-//    OctetVector data;
-
-//    while((maxSentData+MtuAccurecy) < minFailedData) {
-//        auto maximumPacketSize = mMaximumPacketSize;
-
-//        pl_assert(minFailedData > maxSentData);
-//        // Is that called a Binary Search? I'm not sure.
-//        data.resize(minFailedData - ((minFailedData - maxSentData)/2), static_cast<uint8_t>('P'));
-
-//        icmpDataStream.sendData(data);
-
-//        try
-//        {
-//            icmpDataStream.receiveData(data);
-//        } catch(Timeout::TimeoutException &) {
-//            // We've got an EROOR! BUHAHAH!
-//            if(maximumPacketSize != mMaximumPacketSize) {
-//                minFailedData = data.size();
-
-//                continue;
-//            }
-//        }
-
-//        // We've got back the data, YOOOHOO!
-//        maxSentData = data.size();
-//    }
-
-//    setFragmentionStatus(isFragmentionEnbaled);
-//}
-
-//void Ipv4DataStream::onPacketDropped(Ipv4Packet &packet, Ipv4Stream::FilterType::DropReasonType dropReason) {
-//    switch (dropReason) {
-//    case Ipv4Filter::InvalidProtocol:
-//    case Ipv4Filter::InvalidSourceAddress:
-//        if(packet.getProtocol() == IPPROTO_ICMP
-//                && packet.getDataLength() >= Icmp::IcmpPacket::MinimumHeaderLength) {
-//            handleIcmpErrorPacket(packet);
-//        }
-
-//        break;
-//    case Ipv4Filter::InvalidDestinationAddres:
-//    case Ipv4Filter::InvalidVersion:
-//    case Ipv4Filter::InvalidTimeToLive:
-//    case Ipv4Filter::InvalidPacket:
-//    case Ipv4Filter::InvalidOptions:
-//    case Ipv4Filter::InvalidChecksum:
-//    default:
-//        break;
-//    }
-
-//}
-
-//void Ipv4DataStream::handleIcmpErrorPacket(Ipv4Packet &ipv4Packet) {
-//    mVirtualDataStream.insertData(std::move(ipv4Packet.getVectorData()));
-//    Icmp::IcmpPacket icmpPacket;
-//    mIcmpErrorsStream._recv(icmpPacket);
-
-//    // Something's wrong with this packet.
-//    if(mIcmpErrorsStream.getFilter().check(icmpPacket) == false)
-//        return;
-
-//    switch (icmpPacket.getType()) {
-//    case ICMP_DEST_UNREACH:
-//        handleDestinationUnrechable(icmpPacket);
-//        break;
-//    default:
-//        break;
-//    }
-
-//}
-
-//void Ipv4DataStream::handleDestinationUnrechable(const Icmp::IcmpPacket &icmpPacket) {
-//    switch (icmpPacket.getCode()) {
-//    case ICMP_FRAG_NEEDED:
-//    {
-//        auto ipv4Packet = icmpPacket.getOriginalDatagram();
-//        // Hooray! we knows that ipv4Packet.getTotalLength() is no the real MTU!
-
-//        // SECURIT: Ich vill!
-//        if(ipv4Packet.getTotalLength() <= mMaximumPacketSize && mIsFragmentionEnabled == false)
-//            mMaximumPacketSize -= 0xff;
-//    }
-//        break;
-//    default:
-//        break;
-//    }
-//}
-
-
 bool Ipv4DataStream::receiveWithFragmention(Ipv4Packet &packet) {
     getPacketStream().receivePacket(packet);
 
@@ -279,8 +180,6 @@ void Ipv4DataStream::sendWithFragmention(Ipv4Packet &packet) {
         getPacketStream().sendPacket(packet);
     }
 }
-
-
 
 } // Ipv4
 } // ProtocolLearn
