@@ -44,7 +44,8 @@ public:
 
     virtual void sendData(OctetVector &&data) override final;
 
-    OctetVector::SizeType performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy, const uint16_t maxFails);
+    OctetVector::SizeType performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy,
+                                                                  const uint16_t maxFails);
 };
 
 } // namespace Icmp

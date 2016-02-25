@@ -48,7 +48,8 @@ void IcmpDataStream::sendData(OctetVector &&data) {
 }
 
 // What a long name!
-OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy, const uint16_t maxFails) {
+OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy,
+                                                                              const uint16_t maxFails) {
     OctetVector::SizeType maxSentData = 0;
     OctetVector::SizeType minFailedData = getMaximumSendDataLength()+minimumAccurecy;
 
@@ -56,19 +57,19 @@ OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(co
     uint16_t failsCount = 0;
 
     while(failsCount < maxFails && (maxSentData+minimumAccurecy) < minFailedData) {
-        if(minFailedData > maxSentData) // "They're trying to fool us all!"
-            return 0;
+        // If the size that didn't passed before is passed now.
+        if(minFailedData < maxSentData) // "They're trying to fool us all!"
+            break;
 
-        // Is that called a Binary Search? I'm not sure; 'P' is such a cool character!
+        // Is that called a Binary Search? I not sure; 'P' is such a cool character!
         // Perapes, it's good than '\-0' (One's complement, I HATE you11!) (and what the apes have done to you?)
         data.resize(minFailedData - ((minFailedData - maxSentData)/2), static_cast<uint8_t>('P'));
         pl_assert(data.size() != 0);
 
         sendData(std::move(data));
 
-        try
-        {
-            auto receivedData = receiveData();
+        try{
+            receiveData();
 
             // EPIC Programming time! BUUU HAAA!
             if(getReceivePacket().getType() == ICMP_DEST_UNREACH && getReceivePacket().getCode() == ICMP_FRAG_NEEDED)
