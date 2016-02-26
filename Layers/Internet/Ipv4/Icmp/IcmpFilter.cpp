@@ -36,26 +36,49 @@ IcmpFilter::IcmpFilter()
 
 IcmpFilter::DropReasonType IcmpFilter::checkByProtocol(const IcmpPacket &filteredPacket) {
     if(filteredPacket.isChecksumValid() == false)
-        return InvalidChecksum;
+            return InvalidChecksum;
 
-    if((filteredPacket.getType() == ICMP_TIME_EXCEEDED || filteredPacket.getType() == ICMP_DEST_UNREACH)
-            && filteredPacket.getDataLength() <= (Ipv4::Ipv4Packet::MinimumHeaderLength+64))
-        return NoPlaceForOriginalDatagram;
+    if(isError(filteredPacket.getType())) {
+        if(filteredPacket.getDataLength() < Ipv4::Ipv4Packet::MinimumHeaderLength)
+            return InvalidOriginalDatagramSize;
+    }
 
     return DropReason::None;
 }
 
 IcmpFilter::DropReasonType IcmpFilter::checkByPreviousPacket(const IcmpPacket &filteredPacket) {
     auto icmpType = filteredPacket.getType();
-    if(isErrorsAccepted() && (icmpType == ICMP_TIME_EXCEEDED || icmpType == ICMP_DEST_UNREACH))
+    if (isErrorsAccepted() && isError(icmpType))
         return WrongType;
 
-    if(filteredPacket.getSequence() != icmpSession.sequence)
+    if (isError(icmpType)) {
+        if (!isErrorsAccepted())
+            return WrongType;
+
+        auto originalDatagram = filteredPacket.getOriginalDatagram();
+        const auto &ipv4Session = mIcmpSession.mIpv4Session;
+
+        if (originalDatagram.getIdentification() != ipv4Session.identification
+                || originalDatagram.getDestination().toInt() != ipv4Session.destinationAddress
+                || originalDatagram.getSource().toInt() != ipv4Session.sourceAddress
+                || originalDatagram.getProtocol() != ipv4Session.protocol)
+            return UnknownResponsePacket;
+
+        if(mIcmpSession.mIpv4DataSize > originalDatagram.getDataLength())
+            return UnknownResponsePacket;
+
+        if(std::equal(mIcmpSession.mIpv4Data.begin(),
+                      mIcmpSession.mIpv4Data.begin() + mIcmpSession.mIpv4DataSize,
+                      filteredPacket.getVectorData().begin()) == false)
+            return UnknownResponsePacket;
+    }
+
+    if(filteredPacket.getSequence() != mIcmpSession.sequence)
         return InvalidSequence;
-    if(filteredPacket.getId() != icmpSession.id)
+    if(filteredPacket.getId() != mIcmpSession.id)
         return InvalidID;
 
-    if(icmpSession.type == ICMP_ECHO && filteredPacket.getType() != ICMP_ECHOREPLY)
+    if(mIcmpSession.type == ICMP_ECHO && icmpType != ICMP_ECHOREPLY)
         return WrongType;
 
     return DropReason::None;
@@ -71,11 +94,31 @@ void IcmpFilter::setIsErrorsAccepted(bool isErrorsAccepted)
     mIsErrorsAccepted = isErrorsAccepted;
 }
 
+void IcmpFilter::setIsErrorsAccepted(bool isErrorsAccepted,
+                                     const Ipv4::Ipv4Packet &ipv4Packet,
+                                     const OctetVector &data) {
+    mIsErrorsAccepted = isErrorsAccepted;
+
+    if(isErrorsAccepted == false)
+        return;
+
+    mIcmpSession.mIpv4Session.destinationAddress = ipv4Packet.getDestination().toInt();
+    mIcmpSession.mIpv4Session.sourceAddress = ipv4Packet.getSource().toInt();
+    mIcmpSession.mIpv4Session.protocol = ipv4Packet.getProtocol();
+
+    // The packet is synced, there's no need to call toVectorRawPacket.
+    // The required data is only eight bytes.
+    auto endIterator = data.size() < 8 ? data.cend() : data.cbegin() + 8;
+    mIcmpSession.mIpv4DataSize = data.size() < 8 ? data.size() : 8;
+
+    std::copy(data.begin(), endIterator, mIcmpSession.mIpv4Data.begin());
+}
+
 void IcmpFilter::filterByPacket(const IcmpPacket &filteringPacket) {
-    icmpSession.type = filteringPacket.getType();
-    icmpSession.code = filteringPacket.getCode();
-    icmpSession.sequence = filteringPacket.getSequence();
-    icmpSession.id = filteringPacket.getId();
+    mIcmpSession.type = filteringPacket.getType();
+    mIcmpSession.code = filteringPacket.getCode();
+    mIcmpSession.sequence = filteringPacket.getSequence();
+    mIcmpSession.id = filteringPacket.getId();
 }
 
 } // ProtocolLearn

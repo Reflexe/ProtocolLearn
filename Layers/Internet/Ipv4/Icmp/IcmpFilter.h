@@ -26,7 +26,10 @@
 #ifndef ICMPFILTER_H
 #define ICMPFILTER_H
 
+#include <memory>
+
 #include "IcmpPacket.h"
+#include "Ipv4Filter.h"
 
 #include "ProtocolFilter.h"
 
@@ -43,6 +46,16 @@ public:
         uint16_t sequence = 0;
         uint16_t type = 0;
         uint16_t code = 0;
+
+        std::array<uint8_t, 8> mIpv4Data;
+        OctetVector::SizeType mIpv4DataSize;
+
+        struct Ipv4Session {
+            uint32_t sourceAddress;
+            uint32_t destinationAddress;
+            uint16_t protocol;
+            uint16_t identification;
+        } mIpv4Session;
     };
 
     enum ProtocolDropReason{
@@ -50,7 +63,8 @@ public:
         InvalidSequence,
         InvalidID,
         WrongType,
-        NoPlaceForOriginalDatagram
+        InvalidOriginalDatagramSize,
+        UnknownResponsePacket
     };
 
     virtual void filterByPacket(const IcmpPacket &filteringPacket) override final;
@@ -58,15 +72,23 @@ public:
     bool isErrorsAccepted() const;
     void setIsErrorsAccepted(bool isErrorsAccepted);
 
+    void setIsErrorsAccepted(bool isErrorsAccepted,
+                             const Ipv4::Ipv4Packet &ipv4Packet,
+                             const OctetVector &data);
+
 protected:
     virtual DropReasonType checkByProtocol(const IcmpPacket &packet) override final;
     virtual DropReasonType checkByPreviousPacket(const IcmpPacket &filteredPacket) override final;
 
 private:
+    bool isError(uint8_t type)
+    {
+        return type == ICMP_TIME_EXCEEDED || type == ICMP_DEST_UNREACH || type == ICMP_PARAMETERPROB || type == ICMP_REDIRECT;
+    }
+
     bool mIsErrorsAccepted = true;
 
-    IcmpSession icmpSession;
-
+    IcmpSession mIcmpSession;
 };
 
 } // ProtocolLearn
