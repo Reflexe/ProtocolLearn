@@ -63,22 +63,17 @@ void Packet::fromRawPacket(OctetVector &&rawPacket, OctetVector::SizeType header
     pl_assert(rawPacket.size() >= getMinimumHeaderLength());
     pl_assert(rawPacket.size() >= headerLength);
 
-    d.header.clear();
-    d.data.clear();
-
     pl_assert(isValidSizeType(headerLength));
 
-    if (rawPacket.size() == headerLength) {
-        d.header = std::move(rawPacket);
-    } else {
-        auto dataIterator = rawPacket.begin()+headerLength;
+    d.header = std::move(rawPacket);
 
-        d.header.assign(rawPacket.begin(), dataIterator);
+    if (rawPacket.size() != headerLength) {
+        auto dataIterator = d.header.begin()+headerLength;
 
-        // If the we have data, copy it to d.data.
-        pl_assert(isValidSizeType(rawPacket.size()-headerLength));
+        pl_assert(isValidSizeType(d.header.size()-headerLength));
 
-        d.data.assign(dataIterator, rawPacket.end());
+        d.data.assign(dataIterator, d.header.end());
+        d.header.resize(headerLength); // Remove thed aata from the header.
     }
 
     onPacketImport();
