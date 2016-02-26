@@ -36,7 +36,7 @@
 namespace ProtocolLearn {
 namespace Icmp {
 
-typedef PacketStreamUnderDataStream<IcmpPacket, IcmpFilter> IcmpStream;
+typedef PacketStreamUnderDataStream<IcmpPacket, IcmpFilter, Ipv4::Ipv4DataStream> IcmpStream;
 
 } // namespace Icmp
 } // namespace ProtocolLearn
