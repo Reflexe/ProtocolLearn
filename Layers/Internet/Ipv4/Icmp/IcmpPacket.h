@@ -35,12 +35,27 @@
 namespace ProtocolLearn {
 namespace Icmp {
 
-struct IcmpHeader{
+struct IcmpHeader {
     uint8_t type ;
     uint8_t code;
     uint16_t checksum;
-    uint16_t id;
-    uint16_t sequence;
+    union{
+        struct{
+            uint16_t id;
+            uint16_t sequence;
+        }ping;
+
+        struct{
+            uint32_t gateway;
+        }redirect;
+
+        struct{
+            uint8_t pointer;
+            uint8_t unused1;
+            uint16_t unused2;
+        }parmeterProblem;
+    }un;
+
 }__attribute__((packed));
 
 class IcmpPacket : public PacketWrapper<IcmpHeader>
@@ -51,14 +66,16 @@ public:
     uint8_t getType() const{ return getHeader().type; }
     uint8_t getCode() const{ return getHeader().code; }
     uint16_t getChecksum() const{ return ByteOrder::networkToHost(getHeader().checksum); }
-    uint16_t getId() const{ return ByteOrder::networkToHost(getHeader().id); }
-    uint16_t getSequence() const{ return ByteOrder::networkToHost(getHeader().sequence); }
+    uint16_t getId() const{ return ByteOrder::networkToHost(getHeader().un.ping.id); }
+    uint16_t getSequence() const{ return ByteOrder::networkToHost(getHeader().un.ping.sequence); }
+    uint8_t getPointer() const{ return getHeader().un.parmeterProblem.pointer; }
 
     void setType(uint8_t type) { getHeader().type = type; }
     void setCode(uint8_t code) { getHeader().code = code; }
     void setChecksum(uint16_t checksum) { getHeader().checksum = ByteOrder::hostToNetwork(checksum); }
-    void setId(uint16_t id) { getHeader().id = ByteOrder::hostToNetwork(id); }
-    void setSequence(uint16_t sequence) { getHeader().sequence = ByteOrder::hostToNetwork(sequence); }
+    void setId(uint16_t id) { getHeader().un.ping.id = ByteOrder::hostToNetwork(id); }
+    void setSequence(uint16_t sequence) { getHeader().un.ping.sequence = ByteOrder::hostToNetwork(sequence); }
+    void setPointer(uint8_t pointer) { getHeader().un.parmeterProblem.pointer = pointer; }
 
     Ipv4::Ipv4Packet getOriginalDatagram() const;
 
