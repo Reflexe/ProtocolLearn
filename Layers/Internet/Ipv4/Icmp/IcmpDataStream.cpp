@@ -45,6 +45,10 @@ void IcmpDataStream::sendData(OctetVector &&data) {
     mSendPacket.setSequence(mSendPacket.getSequence()+1);
 
     DataStreamUnderPacketStream::sendData(std::move(data));
+
+    getPacketStream().getFilter().setIsErrorsAccepted(true,
+                                                      getPacketStream().getDataStream().getSendPacket(),
+                                                      getSendPacket().getVectorHeader());
 }
 
 // What a long name!
@@ -56,7 +60,8 @@ OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(co
     OctetVector data;
     uint16_t failsCount = 0;
 
-    while(failsCount < maxFails && (maxSentData+minimumAccurecy) < minFailedData) {
+    while(failsCount < maxFails
+          && (maxSentData+minimumAccurecy) < minFailedData) {
         // If the size that didn't passed before is passed now.
         if(minFailedData < maxSentData) // "They're trying to fool us all!"
             break;
