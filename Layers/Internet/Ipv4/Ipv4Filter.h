@@ -15,8 +15,8 @@ public:
     Ipv4Filter();
 
     struct Ipv4Session{
-        Ipv4Address sourceAddress;
-        Ipv4Address destinationAddress;
+        uint32_t sourceAddress;
+        uint32_t destinationAddress;
 
         uint8_t protocol;
     };

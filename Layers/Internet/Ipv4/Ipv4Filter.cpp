@@ -50,9 +50,9 @@ Ipv4Filter::DropReasonType Ipv4Filter::checkByProtocol(const Ipv4Packet &filtere
 }
 
 Ipv4Filter::DropReasonType Ipv4Filter::checkByPreviousPacket(const Ipv4Packet &filteredPacket) {
-    if(filteredPacket.getDestination() != ourSession.sourceAddress)
+    if(filteredPacket.getDestination().toInt() != ourSession.sourceAddress)
         return InvalidDestinationAddres;
-    if(filteredPacket.getSource() != ourSession.destinationAddress)
+    if(filteredPacket.getSource().toInt() != ourSession.destinationAddress)
         return InvalidSourceAddress;
     if(filteredPacket.getProtocol() != ourSession.protocol)
         return InvalidProtocol;
@@ -61,8 +61,8 @@ Ipv4Filter::DropReasonType Ipv4Filter::checkByPreviousPacket(const Ipv4Packet &f
 }
 
 void Ipv4Filter::filterByPacket(const Ipv4Packet &filteringPacket) {
-    ourSession.sourceAddress = filteringPacket.getSource();
-    ourSession.destinationAddress = filteringPacket.getDestination();
+    ourSession.sourceAddress = filteringPacket.getSource().toInt();
+    ourSession.destinationAddress = filteringPacket.getDestination().toInt();
 
     ourSession.protocol = filteringPacket.getProtocol();
 }
