@@ -2,7 +2,7 @@
 
 #include <limits>
 
-#include "NetworkFunctions.h"
+#include "InternetChecksum.h"
 
 namespace ProtocolLearn {
 namespace Ipv4 {
@@ -21,9 +21,12 @@ void Ipv4Packet::setInvalidPacket(Ipv4Packet::ParsingError parsingError)
     mParsingError = parsingError;
 }
 
-uint16_t Ipv4Packet::calculateChecksum(const OctetVector &header)
-{
-    return NetworkFunctions::calculateInternetChecksum(NetworkFunctions::VectorsList{header});
+uint16_t Ipv4Packet::calculateChecksum(const OctetVector &header) {
+    InternetChecksum internetChecksum;
+
+    internetChecksum.add(header);
+
+    return internetChecksum.calculateInternetChecksum();
 }
 
 void Ipv4Packet::updateHeaderLength() {

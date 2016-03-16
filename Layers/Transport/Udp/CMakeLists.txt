@@ -3,5 +3,5 @@ add_library(${PROJECT_NAME} ${pl_library_type} UdpPacket.h UdpPacket.cpp UdpStre
 
 include ( ../../pl_protocol.cmake )
 
-pl_add_module_auto_caller(Utilities/NetworkFunctions)
+pl_add_module_auto_caller(Utilities/InternetChecksum)
 pl_add_module_auto_caller(Utilities/Random)

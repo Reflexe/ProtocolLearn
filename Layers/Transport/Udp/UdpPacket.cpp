@@ -25,7 +25,9 @@
 
 #include "UdpPacket.h"
 
-#include "NetworkFunctions.h"
+#include <limits>
+
+#include "InternetChecksum.h"
 
 namespace ProtocolLearn {
 namespace Udp {
@@ -52,14 +54,24 @@ void UdpPacket::updateChecksum() {
 }
 
 void UdpPacket::onPacketExport() {
-    setLength(getPacketLength());
+    pl_assert(std::numeric_limits<uint16_t>::max() < getPacketLength());
+
+    setLength(static_cast<uint16_t>(getPacketLength()));
 
     updateChecksum();
 }
 
-uint16_t UdpPacket::calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data)
-{
-    return NetworkFunctions::calculateInternetChecksum(NetworkFunctions::VectorsList{header, data});
+uint16_t UdpPacket::calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data) {
+    InternetChecksum internetChecksum;
+
+    internetChecksum.add(pseudoHeader);
+    internetChecksum.add(header);
+    internetChecksum.add(data);
+
+    if (data.size() % 2 != 0)
+        internetChecksum.add(0);
+
+    return internetChecksum.calculateInternetChecksum();
 }
 
 } // namespace Udp

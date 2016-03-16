@@ -76,9 +76,12 @@ std::unique_ptr<LinkProtocol::LinkProtocolFork> EthernetDataStream::fork(bool re
 
 }
 
-OctetVector::SizeType EthernetDataStream::getMaximumSendDataLength()
-{
-    return getBasicInterface().getMaximumSendDataLength()-EthernetPacket::MinimumHeaderLength;
+OctetVector::SizeType EthernetDataStream::getMaximumSendDataLength() {
+    auto maximumSendDataLength = getBasicInterface().getMaximumSendDataLength();
+
+    pl_assert(maximumSendDataLength >= EthernetPacket::MinimumHeaderLength);
+
+    return maximumSendDataLength - EthernetPacket::MinimumHeaderLength;
 }
 
 } // Ethernet

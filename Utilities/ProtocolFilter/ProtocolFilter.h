@@ -39,8 +39,8 @@ class ProtocolFilter
 public:
     enum DropReason {
         InvalidLength = 0xfffd, /* Under stream filter failed */
-        None     = 0xfffe, /* There's no drop */
-        NoReason = 0xffff  /* There's no reason for this drop */
+        None          = 0xfffe, /* There's no drop */
+        NoReason      = 0xffff  /* There's no reason for this drop */
     };
 
     typedef uint16_t DropReasonType;

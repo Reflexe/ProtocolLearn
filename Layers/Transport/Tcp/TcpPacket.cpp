@@ -24,7 +24,7 @@
  */
 
 #include "TcpPacket.h"
-#include "NetworkFunctions.h"
+#include "InternetChecksum.h"
 
 namespace ProtocolLearn {
 namespace Tcp {
@@ -68,7 +68,7 @@ void TcpPacket::onPacketImport() {
 void TcpPacket::onPacketExport() {
     importUnrequiredHeader(mOptionsParser.toOctetVector());
 
-    setOffset(getHeaderLength()/4);
+    setOffset(static_cast<uint8_t>(getHeaderLength()/4));
 
     getHeader().checksum = 0;
     setChecksum(calculateChecksum(getPseudoHeader(), getVectorHeader(), getVectorData()));
@@ -87,8 +87,8 @@ bool TcpPacket::isChecksumValid() const{
     return calculateChecksum(getPseudoHeader(), tcpVectorHeader, getVectorData()) == getChecksum();
 }
 
-uint32_t TcpPacket::getSegementLength() const{
-    uint32_t segementLength = getDataLength();
+OctetVector::SizeType TcpPacket::getSegementLength() const{
+    OctetVector::SizeType segementLength = getDataLength();
 
     if(getFinishFlag() || getSynFlag())
         segementLength += 1;
@@ -97,14 +97,17 @@ uint32_t TcpPacket::getSegementLength() const{
 }
 
 uint16_t TcpPacket::calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data) {
-    NetworkFunctions::VectorsList vectorsList{pseudoHeader, header, data};
-    OctetVector padding{0u};
+    InternetChecksum internetChecksum;
+
+    internetChecksum.add(pseudoHeader);
+    internetChecksum.add(header);
+    internetChecksum.add(data);
 
     // The header and the pseudo header must be aligned anyway.
     if(data.size() % 2 != 0)
-        vectorsList.push_back(std::cref(padding));
+        internetChecksum.add(0);
 
-    return NetworkFunctions::calculateInternetChecksum(vectorsList);
+    return internetChecksum.calculateInternetChecksum();
 }
 
 } // Tcp

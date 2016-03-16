@@ -15,7 +15,7 @@ pl_add_module_auto_caller(Utilities/Timeout)
 pl_add_module_auto_caller(Utilities/Random)
 pl_add_module_auto_caller(Utilities/Debug)
 
-pl_add_module_auto_caller(Utilities/NetworkFunctions)
+pl_add_module_auto_caller(Utilities/InternetChecksum)
 
 pl_add_module_auto_caller(Layers/Internet/InternetProtocol)
 pl_add_module_auto_caller(Layers/Internet/IPProtocol)

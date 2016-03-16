@@ -25,7 +25,7 @@
 
 #include "IcmpPacket.h"
 
-#include "NetworkFunctions.h"
+#include "InternetChecksum.h"
 
 namespace ProtocolLearn {
 namespace Icmp {
@@ -53,9 +53,16 @@ void IcmpPacket::onPacketExport()
     updateChecksum();
 }
 
-uint16_t IcmpPacket::calculateChecksum(const OctetVector &header, const OctetVector &data)
-{
-    return NetworkFunctions::calculateInternetChecksum(NetworkFunctions::VectorsList{header, data});
+uint16_t IcmpPacket::calculateChecksum(const OctetVector &header, const OctetVector &data) {
+    InternetChecksum internetChecksum;
+
+    internetChecksum.add(header);
+    internetChecksum.add(data);
+
+    if (data.size() % 2 != 0)
+        internetChecksum.add(0);
+
+    return internetChecksum.calculateInternetChecksum();
 }
 
 void IcmpPacket::updateChecksum() {

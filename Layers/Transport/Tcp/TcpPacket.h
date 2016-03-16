@@ -125,7 +125,7 @@ public:
      * @return
      * @see RFC 792, page 26.
      */
-    uint32_t getSegementLength() const;
+    OctetVector::SizeType getSegementLength() const;
 
     TcpOptionsParser &getParser() { return mOptionsParser; }
     const TcpOptionsParser &getParser() const{ return mOptionsParser; }

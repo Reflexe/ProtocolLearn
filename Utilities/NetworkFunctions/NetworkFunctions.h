@@ -36,18 +36,7 @@ namespace ProtocolLearn {
 
 class NetworkFunctions
 {
-public:
-    constexpr NetworkFunctions();
 
-    typedef std::reference_wrapper<const OctetVector> VectorReference;
-    typedef std::list<VectorReference> VectorsList;
-
-    /**
-     * @brief calculateInternetChecksum  Calc the internet checksum as explained in RFC1071.
-     * @param vectors
-     * @return The checksum in the host byte order.
-     */
-    static uint16_t calculateInternetChecksum(const VectorsList &vectors);
 };
 
 } // namespace ProtocolLearn

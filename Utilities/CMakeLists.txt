@@ -5,7 +5,7 @@ add_subdirectory(Debug)
 
 add_subdirectory(OctetVector)
 add_subdirectory(ByteOrder)
-add_subdirectory(NetworkFunctions)
+add_subdirectory(InternetChecksum)
 
 add_subdirectory(PTime)
 add_subdirectory(Timeout)

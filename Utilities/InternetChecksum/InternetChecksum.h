@@ -1,10 +1,9 @@
 /**
- * @file
+ * @file %{FILENAME}
  * @author shrek0 (shrek0.tk@gmail.com)
- 
  * @section LICENSE
  *
- * ProtocolLearn copyright (C) 2015 shrek0
+ * ProtocolLearn copyright (C) %YEAR% shrek0
  *
  * ProtocolLearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +21,38 @@
  * @section DESCRIPTION
  *
  */
+#ifndef PROTOCOLLEARN_INTERNETCHECKSUM_H
+#define PROTOCOLLEARN_INTERNETCHECKSUM_H
 
-#include "NetworkFunctions.h"
+#include <cstdint>
+
+#include "OctetVector.h"
 
 namespace ProtocolLearn {
 
+class InternetChecksum
+{
+public:
+    InternetChecksum();
+
+    void add(const uint8_t octet);
+
+    void add(const OctetVector &octetVector);
+
+    /**
+     * @brief calculateInternetChecksum  Calc the internet checksum as explained in RFC1071.
+     * @param vectors
+     * @return The checksum in the host byte order.
+     */
+    uint16_t calculateInternetChecksum();
+
+private:
+    uint64_t mResult = 0;
+    uint8_t mTemp = 0;
+    bool mIsSecond = false;
+
+};
+
 } // namespace ProtocolLearn
 
+#endif // PROTOCOLLEARN_INTERNETCHECKSUM_H
