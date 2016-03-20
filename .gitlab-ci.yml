@@ -1,4 +1,4 @@
-image: gcc-cmake-gl
+image: andystanton/gcc-cmake-gl
 
 myJob:
   script: 
