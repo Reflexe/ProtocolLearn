@@ -1,0 +1,3 @@
+myJob:
+  script: 
+    - "Build/Build.sh"
