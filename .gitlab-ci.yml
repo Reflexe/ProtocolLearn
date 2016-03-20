@@ -1,3 +1,5 @@
+image: gcc-cmake-gl
+
 myJob:
   script: 
     - "Build/Build.sh"
