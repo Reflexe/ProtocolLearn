@@ -1,5 +1,0 @@
-image: andystanton/gcc-cmake-gl
-
-myJob:
-  script: 
-    - "Build/Build.sh"
