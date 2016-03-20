@@ -27,6 +27,8 @@
 
 #include "Ipv4Address.h"
 
+int usage(const char *progranName);
+
 int usage(const char *progranName) {
     std::cout << "Usage: " << progranName << " <Ipv4Address>" << std::endl;
     return EXIT_FAILURE;

@@ -139,7 +139,7 @@ bool Ipv4Address::isValidIpv4Address(const std::string &ipv4Address) {
  */
 Ipv4Address::Ipv4AddressIntType Ipv4Address::ipStringtoInt(const std::string &ipString) const{
     const auto &stringList = StringFunctions::split(ipString, ipv4AddressDelim);
-    std::array<uint8_t, Ipv4AddressLength> ipv4Address = {0, 0, 0, 0};
+    std::array<uint8_t, Ipv4AddressLength> ipv4Address = {{0, 0, 0, 0}};
     size_t i = 0;
 
     for(const auto &string : stringList)
@@ -159,7 +159,7 @@ Ipv4Address::Ipv4AddressIntType Ipv4Address::ipStringtoInt(const std::string &ip
 }
 
 std::string Ipv4Address::ipIntToString(Ipv4Address::Ipv4AddressIntType ipInt) const{
-    std::array<uint8_t, Ipv4AddressLength> ipv4Address = {0, 0, 0, 0};
+    std::array<uint8_t, Ipv4AddressLength> ipv4Address = {{0, 0, 0, 0}};
 
     // Split the Address to four bytes.
     ipv4Address[0] = (ipInt & 0xFF000000u) >> 24;

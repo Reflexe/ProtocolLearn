@@ -4,6 +4,9 @@
 
 #include "EthernetStream.h"
 
+int usage(char *programName);
+std::string ethernetTypeToString(uint16_t ethernetType);
+
 int usage(char *programName) {
     std::cout << "Usage: " << programName << " <Interface>" << std::endl;
     return -1;
@@ -65,7 +68,5 @@ int main(int argc, char *argv[]) {
         cout << "\tProtocol:\t0x" << hex << ethernetPacket.getProtocol();
         cout << " (" << ethernetTypeToString(ethernetPacket.getProtocol()) << ")" << endl;
     }
-
-    return 0;
 }
 

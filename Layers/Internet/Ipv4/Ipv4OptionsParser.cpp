@@ -61,7 +61,6 @@ Ipv4OptionsParser::IsLengthOptionReturn Ipv4OptionsParser::isLengthOption(const 
         case OptionNumber::End:
         case OptionNumber::NoOperation:
             return IsLengthOptionReturn::False;
-            break;
         case OptionNumber::Security:
         case OptionNumber::LooseRoute:
         case OptionNumber::StrictRoute:
@@ -69,10 +68,8 @@ Ipv4OptionsParser::IsLengthOptionReturn Ipv4OptionsParser::isLengthOption(const 
         case OptionNumber::StreamID:
         default:
             return IsLengthOptionReturn::NotFound;
-            break;
         }
 
-        break;
     case OptionClass::Debug:
         switch (optionID.optionNumber) {
         case OptionNumber::Timestamp:
@@ -81,7 +78,6 @@ Ipv4OptionsParser::IsLengthOptionReturn Ipv4OptionsParser::isLengthOption(const 
             return IsLengthOptionReturn::NotFound;
         }
 
-        break;
     default:
         return IsLengthOptionReturn::NotFound;
     }

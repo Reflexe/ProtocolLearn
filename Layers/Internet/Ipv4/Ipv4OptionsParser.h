@@ -26,6 +26,8 @@
 #ifndef PROTOCOLLEARN_PROTOCOLS_IPV4_IPV4OPTIONSPARSER_H
 #define PROTOCOLLEARN_PROTOCOLS_IPV4_IPV4OPTIONSPARSER_H
 
+#include "CompilerFunctions.h"
+
 #include "TcpIpv4OptionsParser.h"
 
 #include "BitField.h"
@@ -45,6 +47,10 @@ namespace Ipv4 {
  * Copied Flag (boolean): On fragmention, copy it to all the fragments?
  */
 struct Ipv4OptionIDType : TcpIpv4OptionIDType {
+    Ipv4OptionIDType() = default;
+
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(Ipv4OptionIDType)
+
     enum OptionClass {
         Control = 0U,
         Debug = 2U

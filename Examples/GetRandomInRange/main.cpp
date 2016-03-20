@@ -28,6 +28,11 @@
 
 #include <iostream>
 
+
+int usage(const char *programName);
+ProtocolLearn::Random::RandomFunction getRandomnessByNumber(uint32_t n);
+
+
 int usage(const char *programName) {
     std::cout << "Usage: " << programName << " <Minimum Number> <Maximum Number> <Randomness number>" << std::endl;
 
@@ -40,13 +45,10 @@ ProtocolLearn::Random::RandomFunction getRandomnessByNumber(uint32_t n) {
     switch (n) {
     case 0:
         return Random::getLowRandomNumber;
-        break;
     case 1:
         return Random::getMediumRandomNumber;
-        break;
     case 2:
         return Random::getHighRandomNumber;
-        break;
     default:
         pl_assert(false);
         break;

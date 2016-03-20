@@ -31,6 +31,8 @@
 
 namespace ProtocolLearn {
 
+bool isPacketsEqual(MyPacket &myPacket, MyPacket &anotherMyPacket);
+
 bool isPacketsEqual(MyPacket &myPacket, MyPacket &anotherMyPacket) {
     pl_assert(anotherMyPacket.getAnotherField() == myPacket.getAnotherField());
     pl_assert(anotherMyPacket.getBigField() == myPacket.getBigField());

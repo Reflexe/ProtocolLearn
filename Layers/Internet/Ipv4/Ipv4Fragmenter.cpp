@@ -62,7 +62,7 @@ std::list<Ipv4Packet> Ipv4Fragmenter::fragmentPacket(const Ipv4Packet &packetToS
 
     for(auto &dataFragment : dataFragmentslist) {
         temporaryPacket.importData(std::move(dataFragment));
-        temporaryPacket.setFragmentOffset(fragmentOffsetBytes/8);
+        temporaryPacket.setFragmentOffset(static_cast<uint16_t>(fragmentOffsetBytes/8));
 
         packetFragmentsList.push_back(temporaryPacket);
 

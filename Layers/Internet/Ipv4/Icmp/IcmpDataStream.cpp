@@ -32,8 +32,8 @@ namespace Icmp {
 
 IcmpDataStream::IcmpDataStream(IcmpStream &icmpStream, uint8_t type, uint8_t code)
     : DataStreamUnderPacketStream(icmpStream) {
-    mSendPacket.setSequence(Random::getMediumRandomNumber()); // Add some security, 16 bit number is not enough.
-    mSendPacket.setId(Random::getMediumRandomNumber());
+    mSendPacket.setSequence(static_cast<uint16_t>(Random::getMediumRandomNumber()));
+    mSendPacket.setId(static_cast<uint16_t>(Random::getMediumRandomNumber()));
 
     mSendPacket.setType(type);
     mSendPacket.setCode(code);

@@ -21,23 +21,36 @@
  * @section DESCRIPTION
  *
  */
+#ifndef PROTOCOLLEARN_DNS_DNSDOMAIN_H
+#define PROTOCOLLEARN_DNS_DNSDOMAIN_H
 
-#ifndef PROTOCOLLEARN_BASICPROTOCOL_H
-#define PROTOCOLLEARN_BASICPROTOCOL_H
+#include <string>
+#include <vector>
 
-#include "DataStream.h"
+#include "OctetVector.h"
 
 namespace ProtocolLearn {
+namespace Dns {
 
-class BasicProtocol : public DataStream
+// A list of dns labels.
+class DnsDomain
 {
 public:
-    BasicProtocol();
-    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(BasicProtocol)
+    DnsDomain();
 
-    virtual OctetVector::SizeType getMaximumSendDataLength() = 0;
+    std::pair<bool, OctetVector::SizeType> fromData(const OctetVector::const_iterator &begin, const OctetVector::const_iterator &end);
+    bool fromString(const std::string &string);
+
+    std::string toString() const;
+
+private:
+    typedef std::vector<std::pair<OctetVector::const_iterator, OctetVector::const_iterator>> IteratorListType;
+
+    OctetVector mDomainData;
+    IteratorListType mIteratorsList;
 };
 
+} // namespace Dns
 } // namespace ProtocolLearn
 
-#endif // PROTOCOLLEARN_BASICPROTOCOL_H
+#endif // PROTOCOLLEARN_DNS_DNSDOMAIN_H

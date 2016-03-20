@@ -53,8 +53,9 @@ macro(pl_add_library library_name)
     add_library(${PROJECT_NAME} ${pl_library_type} ${files_list})
 endmacro()
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+set(pl_compiler_arguments "-Weverything -Wno-c++98-compat -Wno-documentation -Wno-padded -Wno-shadow -Wno-c++98-c++11-compat-pedantic -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-packed -Wno-switch-enum -Wno-covered-switch-default")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${pl_compiler_arguments} -Wno-global-constructors -Wno-exit-time-destructors")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${pl_compiler_arguments}")
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)

@@ -60,7 +60,7 @@ public:
 
     static bool equal(const Ipv6Address &ipv6Address, const Ipv6Address &anotherIpv6Address);
 
-    bool operator =(const Ipv6Address &ipv6Address) const{ return equal(*this, ipv6Address); }
+    bool operator ==(const Ipv6Address &ipv6Address) const{ return equal(*this, ipv6Address); }
     bool operator !=(const Ipv6Address &ipv6Address) const{ return !equal(*this, ipv6Address); }
 
     const IntegerType &toInteger() const{ return mIntegerType; }

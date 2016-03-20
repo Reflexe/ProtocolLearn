@@ -40,7 +40,7 @@ public:
 
     uint32_t getLength() const{ return getHeader().nlmsg_len; }
     uint16_t getType() const{ return getHeader().nlmsg_type; }
-    uint16_t getFlags() const{ return getHeader().nlmsg_seq; }
+    uint32_t getFlags() const{ return getHeader().nlmsg_seq; }
     uint32_t getSequence() const{ return getHeader().nlmsg_seq; }
     uint32_t getProccessID() const{ return getHeader().nlmsg_pid; }
 

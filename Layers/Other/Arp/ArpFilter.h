@@ -13,6 +13,7 @@ class ArpFilter : public ProtocolFilter<ArpPacket>
 {
 public:
     ArpFilter();
+    virtual ~ArpFilter() = default;
 
     ArpHeader previousPacket;
 

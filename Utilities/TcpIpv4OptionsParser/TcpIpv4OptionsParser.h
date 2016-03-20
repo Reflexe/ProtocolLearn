@@ -28,11 +28,16 @@
 
 #include <limits>
 
+#include "CompilerFunctions.h"
 #include "OptionsParser.h"
 
 namespace ProtocolLearn {
 
 struct TcpIpv4OptionIDType {
+    TcpIpv4OptionIDType() = default;
+
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(TcpIpv4OptionIDType)
+
     /**
      * @brief Export the option ID to an octet.
      * @return
@@ -85,20 +90,18 @@ public:
     {
     }
 
-    virtual ~TcpIpv4OptionsParser()
-    {
-    }
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(TcpIpv4OptionsParser)
 
-    virtual void parse(const OctetVector &octetVector) override{
+    virtual void parse(OctetVector::const_iterator begin, OctetVector::const_iterator end) override{
         OptionsParserType::clearOptions();
         setInvalidOptions(InvalidationReason::None);
 
         pl_debug("Parsering options...");
 
-        if(octetVector.size() < sizeof(OptionIDType))
+        if(end-begin < static_cast<OctetVector::difference_type>(sizeof(OptionIDType)))
             return setInvalidOptions(InvalidationReason::NotEnoughSpaceForOptionID);
 
-        for(auto nextOctet = octetVector.cbegin(); nextOctet < octetVector.cend(); ) {
+        for(auto nextOctet = begin; nextOctet < end; ) {
             StructOptionIDType optionID{};
             optionID.fromOctet(*nextOctet);
             ++nextOctet;
@@ -110,7 +113,7 @@ public:
             case IsLengthOptionReturn::True:
             {
                 // If there's no place for the option length byte.
-                if(octetVector.cend() == nextOctet) {
+                if(end == nextOctet) {
                     pl_debug("no place for option length");
                     return setInvalidOptions(InvalidationReason::NotEnoughSpaceForOptionLength);
                 }
@@ -118,7 +121,7 @@ public:
                 const uint8_t optionLength = *nextOctet;
                 ++nextOctet;
 
-                if(isValidOptionLength(optionLength, octetVector, nextOctet) == false) {
+                if(isValidOptionLength(optionLength, end, nextOctet) == false) {
                     pl_debug("Invalid option length: " << +optionLength);
                     return setInvalidOptions(InvalidationReason::NotEnoughSpaceForOptionData);
                 }
@@ -141,9 +144,6 @@ public:
                 // If it's an invalid option number;
                 pl_debug("option not found: " << +*nextOctet);
                 return setInvalidOptions(InvalidationReason::InvalidOptionID);
-                break;
-            default:
-                pl_assert(false);
                 break;
             }
 
@@ -169,7 +169,7 @@ public:
                 pl_assert(option.second.data.size() > 0);
                 pl_assert((option.second.data.size()+2) <= std::numeric_limits<uint8_t>::max());
 
-                octetVector.push_back(option.second.data.size()+2);
+                octetVector.push_back(static_cast<uint8_t>(option.second.data.size()+2));
 
                 octetVector.add(option.second.data);
             } else {
@@ -213,14 +213,14 @@ protected:
     }
 
 private:
-    static bool isValidOptionLength(uint8_t optionLength, const OctetVector &octetVector, const OctetVector::const_iterator &nextOctet) {
+    static bool isValidOptionLength(uint8_t optionLength, const OctetVector::const_iterator end, const OctetVector::const_iterator &nextOctet) {
         // The option size field counts the option type and the option length and the data length as well (RFC791, page 15).
         // Therefore, it must be grether than the size of option type and option length.
 
         // The option size plus the current position must be lower than the the vector's end.
         // The -2 is because that the option length counts itself and the option type octet as well (and we already read them with nextOctet).
 
-        return (optionLength >= 2) && octetVector.cend() >= nextOctet+(optionLength-2);
+        return (optionLength >= 2) && end >= nextOctet+(optionLength-2);
     }
 
     void setInvalidOptions(InvalidationReason invalidationReason)

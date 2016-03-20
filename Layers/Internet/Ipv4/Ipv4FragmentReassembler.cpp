@@ -72,7 +72,7 @@ void Ipv4FragmentReassembler::insertPacket(Ipv4Packet &&ipv4Packet) {
         pl_crap("last fragment found");        
 
         mLastOffset = offset;
-        mTotalLength = (mLastOffset*8) + ipv4Packet.getDataLength();
+        mTotalLength = static_cast<uint16_t>((mLastOffset*8) + ipv4Packet.getDataLength());
     }
 }
 

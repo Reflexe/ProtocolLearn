@@ -115,7 +115,7 @@ OctetVector TcpDataStream::receiveData() {
 
     OctetVector data{mReceiveQueue.pop_front()};
     // We're expending the window only here: the requested data must not be greather than the window.
-    getYourTCB().window.expendWindow(data.size());
+    getYourTCB().window.expendWindow(static_cast<uint32_t>(data.size()));
 
     return data;
 }
@@ -130,7 +130,7 @@ void TcpDataStream::_send(OctetVector &&data){
     // Split large datas.
     if(data.size() > getMaximumSendDataLength()) {
         auto nextOctetToSend = data.cbegin();
-        auto pastLastOctetToSend = nextOctetToSend + getMaximumSendDataLength();
+        auto pastLastOctetToSend = nextOctetToSend + static_cast<OctetVector::difference_type>(getMaximumSendDataLength());
 
         do {
             sendFragmentInWindow(OctetVector{nextOctetToSend, pastLastOctetToSend});
@@ -143,7 +143,7 @@ void TcpDataStream::_send(OctetVector &&data){
                 sync(true);
 
             nextOctetToSend = pastLastOctetToSend;
-            pastLastOctetToSend += getMaximumSendDataLength();
+            pastLastOctetToSend += static_cast<OctetVector::difference_type>(getMaximumSendDataLength());
             if(pastLastOctetToSend > data.cend())
                 pastLastOctetToSend = data.cend();
         } while(nextOctetToSend < data.cend());
@@ -310,6 +310,7 @@ void TcpDataStream::sendPacket(TcpDataStream::TcpPacketType packetType, uint32_t
     case TcpPacketType::SynPacket:
         getSendPacket().setSynFlag(false);
         break;
+    case TcpPacketType::DataPacket:
     default:
         break;
     }
@@ -373,7 +374,7 @@ void TcpDataStream::onPacketDropped(const TcpPacket &packet, TcpFilter::DropReas
             sendReset(packet);
             break;
         } // else, just continue to the next.
-
+        [[clang::fallthrough]];
     case ProtocolDropReason::InvalidSequence:
     case ProtocolDropReason::AcknowledgmentRqeuired:
     case ProtocolDropReason::SyncedAcknowledgmentRequired:
@@ -441,7 +442,7 @@ void TcpDataStream::sendReset(const TcpPacket &tcpPacket) {
     } else {
         getSendPacket().setAcknowledgmentFlag(true);
         getSendPacket().setSequenceNumber(0);
-        getSendPacket().setAcknowledgmentNumber(tcpPacket.getSequenceNumber()+tcpPacket.getSegementLength());
+        getSendPacket().setAcknowledgmentNumber(static_cast<uint32_t>(tcpPacket.getSequenceNumber()+tcpPacket.getSegementLength()));
     }
 
     getPacketStream()._send(getSendPacket());

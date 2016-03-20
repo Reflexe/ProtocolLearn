@@ -43,6 +43,7 @@ public:
     };
 
     UdpFilter();
+    virtual ~UdpFilter();
 
     bool isInvalidChecksumCritical() const;
     void setIsInvalidChecksumCritical(bool isInvalidChecksumCritical);

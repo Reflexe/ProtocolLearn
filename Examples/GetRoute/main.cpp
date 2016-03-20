@@ -3,6 +3,8 @@
 #include "Route.h"
 #include "Ipv4Address.h"
 
+int usage(const char *programName);
+
 int usage(const char *programName) {
     std::cout << "Usage: " << programName << " <Ipv4 Address>" << std::endl;
     return -1;
@@ -30,7 +32,6 @@ int main(int argc, char *argv[]) {
         break;
     case Route::RouteType::LocalLink:
         cout << "A local address";
-    default:
         break;
     }
 

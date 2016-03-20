@@ -96,7 +96,7 @@ void Socket::receive(OctetVector &buffer, OctetVector::size_type maxPacketSize, 
     if(stats < 0)
         throw SocketException("Socket::recv()");
 
-    buffer.resize(stats);
+    buffer.resize(static_cast<OctetVector::SizeType>(stats));
 }
 
 void Socket::send(const OctetVector &buffer, OctetVector::size_type packetSize, int flags) const{
@@ -125,7 +125,12 @@ void Socket::receiveFrom(OctetVector &buffer, OctetVector::size_type maxPacketSi
 void Socket::sendTo(const OctetVector &buffer, const SocketAddress &socketAddress) const{
     ssize_t stats = 0;
 
-    stats = ::sendto(s.fileDescriptor, buffer.data(), buffer.size(), 0, socketAddress.getSockaddr<sockaddr>(), socketAddress.getLength());
+    stats = ::sendto(s.fileDescriptor,
+                     buffer.data(),
+                     buffer.size(),
+                     0,
+                     socketAddress.getSockaddr<sockaddr>(),
+                     static_cast<socklen_t>(socketAddress.getLength()));
 
     if(stats < 0)
         throw Socket::SocketException("sendto()");
@@ -144,7 +149,9 @@ void Socket::setSocketOption(int level, int optionName, const void *option, sock
 }
 
 void Socket::bind(const SocketAddress &socketAddress) {
-    if(::bind(s.fileDescriptor, socketAddress.getSockaddr<sockaddr>(), socketAddress.getLength()) < 0)
+    if(::bind(s.fileDescriptor,
+              socketAddress.getSockaddr<sockaddr>(),
+              static_cast<socklen_t>(socketAddress.getLength())) < 0)
         throw SocketException("Cannot Bind!");
 
     setSockaddr(socketAddress);

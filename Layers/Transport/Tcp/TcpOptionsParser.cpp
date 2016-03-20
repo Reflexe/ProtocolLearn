@@ -55,7 +55,6 @@ TcpOptionsParser::IsLengthOptionReturn TcpOptionsParser::isLengthOption(const Tc
     case TcpOptionID::End:
     case TcpOptionID::NOP:
         return IsLengthOptionReturn::False;
-        break;
 
     case TcpOptionID::MaximumSegementSize:
     case TcpOptionID::WindowScale:
@@ -63,10 +62,8 @@ TcpOptionsParser::IsLengthOptionReturn TcpOptionsParser::isLengthOption(const Tc
     case TcpOptionID::SelectiveACK:
     case TcpOptionID::Timestamp:
         return IsLengthOptionReturn::True;
-        break;
     default:
         return IsLengthOptionReturn::NotFound;
-        break;
     }
 }
 

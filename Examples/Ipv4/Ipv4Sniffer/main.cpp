@@ -5,6 +5,14 @@
 
 using namespace ProtocolLearn;
 
+
+
+std::string ethernetTypeToString(uint16_t ethernetType);
+ProtocolLearn::Ethernet::EthernetFilter::DropReasonType ethernetFilterCallback(const Ethernet::EthernetPacket &ethernetPacket);
+std::string ipv4TypeToString(uint8_t protocol);
+int usage(const char *programName);
+
+
 std::string ethernetTypeToString(uint16_t ethernetType) {
     std::string ethernetStringType;
 
@@ -94,7 +102,6 @@ std::string optionTypeToString(Ipv4::Ipv4OptionIDType optionID) {
         default:
             return "Unknown Option Number";
         }
-        break;
 
     case OptionClass::Debug:
         switch (optionID.optionNumber) {
@@ -114,19 +121,14 @@ std::string ipv4PacketParsingErrorToString(Ipv4::Ipv4Packet::ParsingError parsin
     switch (parsingError) {
     case ParsingError::None:
         return "None";
-        break;
     case ParsingError::InvalidVersion:
         return "Invalid version";
-        break;
     case ParsingError::InvalidInternetHeaderLength:
         return "Invalid internet header length";
-        break;
     case ParsingError::NoPlaceForOptions:
         return "There's no place for the options";
-        break;
     default:
         return "Unknown";
-        break;
     }
 }
 
@@ -207,6 +209,4 @@ int main(int argc, char *argv[]) {
         if(Ipv4FragmentReassembler::isFragment(ipv4Packet))
             std::cout << "\tFragment" << std::endl;
     }
-
-    return 0;
 }

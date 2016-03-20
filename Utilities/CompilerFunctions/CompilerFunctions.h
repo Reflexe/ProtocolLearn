@@ -39,6 +39,12 @@ public:
     }
 };
 
+#define PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(type) virtual ~type() = default;\
+    type(const type &) = default;\
+    type(type &&) = default;\
+    type &operator = (type &&) = default;\
+    type &operator = (const type &) = default;
+
 } // namespace ProtocolLearn
 
 #endif // PROTOCOLLEARN_COMPILERFUNCTIONS_H

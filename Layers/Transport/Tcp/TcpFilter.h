@@ -144,7 +144,7 @@ private:
     }
 
     DropReasonType successUpdate(uint32_t sequenceNumber, uint32_t acknowledgmentNumber,
-                                 uint32_t windowSize, uint32_t segementLength);
+                                 uint16_t windowSize, uint32_t segementLength);
 
     TcpSession mTcpSession;
 

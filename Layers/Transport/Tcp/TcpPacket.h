@@ -142,8 +142,6 @@ public:
 private:
     static uint16_t calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data);
 
-    void parseOptions(OctetVector::SizeType dataOffset);
-
     virtual void onPacketImport() override;
     virtual void onPacketExport() override;
 

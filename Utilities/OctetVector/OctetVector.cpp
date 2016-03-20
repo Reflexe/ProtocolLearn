@@ -71,9 +71,9 @@ std::list<OctetVector> OctetVector::splitTo(OctetVector::SizeType maximumChunkSi
     std::list<OctetVector> partsList;
     auto nextOctetToRead = cbegin();
 
-    for(SizeType i = 0; i < requestedParts; ++i, nextOctetToRead+=maximumChunkSize)
+    for(SizeType i = 0; i < requestedParts; ++i, nextOctetToRead+=static_cast<OctetVector::difference_type>(maximumChunkSize))
     {
-        partsList.push_back(OctetVector{nextOctetToRead, nextOctetToRead+maximumChunkSize});
+        partsList.push_back(OctetVector{nextOctetToRead, nextOctetToRead+static_cast<OctetVector::difference_type>(maximumChunkSize)});
     }
 
     if(size() % maximumChunkSize != 0)

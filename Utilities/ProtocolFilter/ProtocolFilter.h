@@ -54,6 +54,8 @@ public:
         mFiltersStatus.underStreamFilter = mFiltersStatus.userFilter = false;
     }
 
+    virtual ~ProtocolFilter() = default;
+
     /**
      * @brief Check with the filters if the packet should be passed.
      * @param filteredPacket  The packet to check.

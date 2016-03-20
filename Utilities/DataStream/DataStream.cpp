@@ -40,7 +40,13 @@ OctetVector DataStream::receiveData() {
     auto timeToWait = mTimeout.getTimeToWait();
 
     try {
-        return _receiveData();
+        auto data = _receiveData();
+
+        // Restore the original time.
+        if(getTimeout() != timeToWait)
+            setTimeout(timeToWait);
+
+        return data;
     } catch(...) {
         // Restore the original time.
         if(getTimeout() != timeToWait)
@@ -48,10 +54,6 @@ OctetVector DataStream::receiveData() {
 
         throw;
     }
-
-    // Restore the original time.
-    if(getTimeout() != timeToWait)
-        setTimeout(timeToWait);
 }
 
 OctetVector DataStream::_receiveData() {

@@ -25,6 +25,8 @@
 
 #include "NetlinkPacket.h"
 
+#include <limits>
+
 namespace ProtocolLearn {
 namespace Netlink {
 
@@ -32,9 +34,10 @@ NetlinkPacket::NetlinkPacket()
 {
 }
 
-void NetlinkPacket::onPacketExport()
-{
-    getHeader().nlmsg_len = getPacketLength();
+void NetlinkPacket::onPacketExport() {
+    pl_assert(getPacketLength() < std::numeric_limits<uint32_t>::max());
+
+    getHeader().nlmsg_len = static_cast<uint32_t>(getPacketLength());
 }
 
 } // ProtocolLearn

@@ -25,6 +25,8 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+#include "CompilerFunctions.h"
+
 #include "OctetVector.h"
 
 #include "Debug.h"
@@ -43,13 +45,7 @@ public:
      */
     explicit Packet(const OctetVector::SizeType &minimumHeaderLength);
 
-    virtual ~Packet() = default;
-
-//    Packet(const Packet &packet) = default;
-//    Packet(Packet &&packet) = default;
-
-//    Packet &operator = (Packet &&packet) = default;
-//    Packet &operator = (const Packet &packet) = default;
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(Packet)
 
     /**
      * @brief Reset the packet to inital state.
@@ -118,6 +114,11 @@ public:
         return getDataLength() != 0;
     }
 
+    bool isUnrequiredHeaderPacket() const
+    {
+        return getHeaderLength() != getMinimumHeaderLength();
+    }
+
     /**
      * @brief Import data from a OctetVector.
      * @param data  Data type.
@@ -169,6 +170,16 @@ protected:
     void importUnrequiredHeader(const OctetVector &dataType);
 
     OctetVector getUnrequiredHeader();
+
+    OctetVector::const_iterator getUnrequiredHeaderBegin() {
+        return getVectorHeader().cbegin()
+                + static_cast<OctetVector::difference_type>(getMinimumHeaderLength());
+    }
+
+    OctetVector::const_iterator getUnrequiredHeaderEnd()
+    {
+        return getVectorHeader().cend();
+    }
 
     /**
      * @brief Called on fromRawPacket.

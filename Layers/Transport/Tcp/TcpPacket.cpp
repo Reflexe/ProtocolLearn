@@ -33,34 +33,16 @@ TcpPacket::TcpPacket()
 {
 }
 
-void TcpPacket::parseOptions(OctetVector::SizeType dataOffset) {
-    pl_debug("Parsering options...");
-
-    auto dataOffestInDataVector = dataOffset - getMinimumHeaderLength();
-
-    if(dataOffestInDataVector > getDataLength())
-        return setInvalidPacket(ParsingError::NoPlaceForOptionsInData);
-
-    // Parse the options.
-    OctetVector unrequiredHeader{getVectorData().cbegin(), getVectorData().cbegin() + dataOffestInDataVector};
-
-    // erase the options data (from the data vector).
-    getVectorData().erase(getVectorData().begin(), getVectorData().begin() + dataOffestInDataVector);
-
-    mOptionsParser.parse(unrequiredHeader);
-    importUnrequiredHeader(unrequiredHeader);
-}
-
 void TcpPacket::onPacketImport() {
-    pl_debug("Parsering a new packet...");
+    pl_crap("Parsering a new packet...");
 
     OctetVector::SizeType dataOffset = getOffset()*4;
 
     if(getMinimumHeaderLength() > dataOffset)
         return setInvalidPacket(ParsingError::OffsetLowerThanMinimumHeader);
 
-    if(dataOffset > getMinimumHeaderLength())
-        parseOptions(dataOffset);
+    if(dataOffset > getMinimumHeaderLength() && isUnrequiredHeaderPacket())
+        mOptionsParser.parse(getUnrequiredHeaderBegin(), getUnrequiredHeaderEnd());
     else
         getParser().clearOptions();
 }

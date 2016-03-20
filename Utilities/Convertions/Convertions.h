@@ -51,13 +51,13 @@ private:
     template<typename T>
     static T convertStringToSignedInteger(const std::string &string, int base)
     {
-        return std::stoi(string, nullptr, base);
+        return static_cast<T>(std::stoi(string, nullptr, base));
     }
 
     template<typename T>
     static T convertStringToUnsignedInteger(const std::string &string, int base)
     {
-        return std::stoul(string, nullptr, base);
+        return static_cast<T>(std::stoul(string, nullptr, base));
     }
 
 public:

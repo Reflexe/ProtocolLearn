@@ -60,7 +60,7 @@ void MessageSocket::sendMessage(const OctetVector &data) const{
     msgHeader.msg_iov = &iove;
     msgHeader.msg_iovlen = 1;
     msgHeader.msg_name = const_cast<sockaddr_nl *>(mSocket.getSocketAddress().getSockaddr<sockaddr_nl>());
-    msgHeader.msg_namelen = mSocket.getSocketAddress().getLength();
+    msgHeader.msg_namelen = static_cast<socklen_t>(mSocket.getSocketAddress().getLength());
 
     iove.iov_base = const_cast<uint8_t *>(data.data());
     iove.iov_len = data.size();

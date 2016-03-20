@@ -29,13 +29,16 @@
 #include "Timeout.h"
 #include "OctetVector.h"
 
+#include "CompilerFunctions.h"
+
 namespace ProtocolLearn {
 
 class DataStream
 {
 public:
     DataStream();
-    virtual ~DataStream() = default;
+
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(DataStream)
 
     virtual void sendData(OctetVector &&data);
     virtual OctetVector receiveData();

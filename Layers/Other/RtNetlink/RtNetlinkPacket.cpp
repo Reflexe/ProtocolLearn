@@ -34,7 +34,7 @@ RtNetlinkPacket::RtNetlinkPacket()
 
 void RtNetlinkPacket::onPacketImport() {
     if(isDataPacket())
-        rtattrParser.parse(getVectorData());
+        rtattrParser.parse(getVectorData().cbegin(), getVectorData().cend());
     else
         getParser().clearOptions();
 }

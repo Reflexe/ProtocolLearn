@@ -28,6 +28,7 @@
 
 #include <unordered_map>
 
+#include "CompilerFunctions.h"
 #include "OctetVector.h"
 
 namespace ProtocolLearn {
@@ -41,6 +42,7 @@ struct OptionType {
     OptionType(OctetVector &&data);
 
     OptionType();
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(OptionType)
 
     OctetVector data;
 
@@ -68,15 +70,12 @@ public:
     {
     }
 
-    virtual ~OptionsParser()
-    {
-    }
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(OptionsParser)
 
     /**
-     * @brief parse  Parse the given OctetVector into mOptionsMap.
-     * @param octetVector  Every valid OctetVector.
+     * @brief parse  Parse the given range into mOptionsMap.
      */
-    virtual void parse(const OctetVector &octetVector) = 0;
+    virtual void parse(OctetVector::const_iterator begin, OctetVector::const_iterator end) = 0;
 
     /**
      * @brief toOctetVector  Export mOptionsMap into a OctetVector.

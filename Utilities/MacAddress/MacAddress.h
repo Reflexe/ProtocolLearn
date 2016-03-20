@@ -15,8 +15,8 @@ class MacAddress
 {
 public:
     // Flags.
-    static const uint8_t macFlagMulticast  = 0b10000000;
-    static const uint8_t macFlagUnicast    = 0b00000000;
+    static const uint8_t macFlagMulticast  = 128; // The last bit.
+    static const uint8_t macFlagUnicast    = 0;
 
     static const char macAddressDelim[];
 
@@ -51,8 +51,6 @@ public:
      * @param stringAddress
      */
     explicit MacAddress(const std::string &stringAddress);
-
-    ~MacAddress();
 
     MacAddress &operator = (const MacIntegerType &numericAddress);
 

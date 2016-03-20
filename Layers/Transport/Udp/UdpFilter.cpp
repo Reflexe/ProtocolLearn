@@ -32,6 +32,10 @@ UdpFilter::UdpFilter()
 {
 }
 
+UdpFilter::~UdpFilter()
+{
+}
+
 UdpFilter::DropReasonType UdpFilter::checkByProtocol(const UdpPacket &filteredPacket) {
     if(mIsInvalidChecksumCritical == true && filteredPacket.isValidChecksum() == false)
         return InvalidChecksum;

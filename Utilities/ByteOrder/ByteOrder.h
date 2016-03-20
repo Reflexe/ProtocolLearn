@@ -47,8 +47,8 @@ public:
         //    result |= (value & 0x00FF) << 8;
         //    result |= (value & 0xFF00) >> 8;
 
-        return (((value & 0x00FF) << 8)
-                | ((value & 0xFF00) >> 8));
+        return static_cast<uint16_t>((((value & 0x00FF) << 8)
+                | ((value & 0xFF00) >> 8)));
 
         //    return bswap_16(value);
     }

@@ -8,7 +8,7 @@ const char MacAddress::macAddressDelim[] = ":";
 const MacAddress MacAddress::BroadcastAddress("ff:ff:ff:ff:ff:ff");
 
 MacAddress::MacAddress()
-    : mNumericAddress{0, 0, 0, 0, 0, 0}, mStringAddress("00:00:00:00:00:00")
+    : mNumericAddress{{0, 0, 0, 0, 0, 0}}, mStringAddress("00:00:00:00:00:00")
 {
 }
 
@@ -29,10 +29,6 @@ MacAddress::MacAddress(const std::string &stringAddress)
         throw InvalidArgument("MacAddress::fromString");
 
     mNumericAddress = macStringToInteger(stringAddress);
-}
-
-MacAddress::~MacAddress()
-{
 }
 
 MacAddress &MacAddress::operator =(const uint8_t numericAddress[MacAddressLength]) {
@@ -80,7 +76,7 @@ void MacAddress::setMulticast() {
 
 void MacAddress::setUnicast() {
     if(isMulticast())
-        mNumericAddress[0] &= 0b01111111;
+        mNumericAddress[0] &= 127;
 }
 
 MacAddress MacAddress::fromString(const std::string &address)

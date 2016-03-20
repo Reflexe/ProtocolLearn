@@ -55,7 +55,7 @@ OctetVector Packet::getUnrequiredHeader() {
     if(getHeaderLength() == getMinimumHeaderLength())
         return OctetVector{};
 
-    return OctetVector(getVectorHeader().cbegin()+getMinimumHeaderLength(), getVectorHeader().cend());
+    return OctetVector(getVectorHeader().cbegin()+static_cast<OctetVector::difference_type>(getMinimumHeaderLength()), getVectorHeader().cend());
 }
 
 void Packet::fromRawPacket(OctetVector &&rawPacket, OctetVector::SizeType headerLength) {
@@ -68,7 +68,7 @@ void Packet::fromRawPacket(OctetVector &&rawPacket, OctetVector::SizeType header
     d.header = std::move(rawPacket);
 
     if (rawPacket.size() != headerLength) {
-        auto dataIterator = d.header.begin()+headerLength;
+        auto dataIterator = d.header.begin()+static_cast<OctetVector::difference_type>(headerLength);
 
         pl_assert(isValidSizeType(d.header.size()-headerLength));
 

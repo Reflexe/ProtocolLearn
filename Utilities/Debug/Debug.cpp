@@ -36,7 +36,7 @@ constexpr Debug::Debug()
 
 std::unordered_set<std::string> Debug::mDebbugedFiles;
 
-void Debug::assert(bool result, const char *expr, const char *functionName, int line, const char *fileName) {
+void Debug::assert(bool result, const char *expr, const char *functionName, int line, const char *) {
     if(result)
         return;
 

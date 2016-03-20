@@ -52,7 +52,7 @@ Ipv4DataStream::Ipv4DataStream(Ipv4Stream &ipv4Stream, const Ipv4Address &destin
 
 void Ipv4DataStream::_send(OctetVector &&data) {
     // Update the ID before the sending.
-    getSendPacket().setIdentification(Random::getMediumRandomNumber());
+    getSendPacket().setIdentification(static_cast<uint16_t>(Random::getMediumRandomNumber()));
     getSendPacket().importData(std::move(data));
 
     if(isFragmentionEnabled() == false) {

@@ -61,7 +61,7 @@ bool TcpFilter::isValidSequenceNumber(const TcpFilter::TcpTransmissionControlBlo
         if(TCB.window.isZeroWindow())
             return false;
         else
-            return TCB.window.isInWindow(sequenceNumber) && TCB.window.isInWindow(sequenceNumber+segementLength);
+            return TCB.window.isInWindow(sequenceNumber) && TCB.window.isInWindow(static_cast<uint32_t>(sequenceNumber+segementLength));
     } else {
         if(TCB.window.isZeroWindow())
             return sequenceNumber == TCB.window.getNextSequence();
@@ -77,7 +77,7 @@ bool TcpFilter::isValidAcknowledmentNumber(const TcpFilter::TcpTransmissionContr
 
 void TcpFilter::updateWindowSize(uint16_t packetWindowSize, TcpFilter::TcpTransmissionControlBlock &TCB)
 {
-    TCB.window.updateWindow(packetWindowSize << TCB.windowShift);
+    TCB.window.updateWindow(static_cast<uint32_t>(packetWindowSize) << TCB.windowShift);
 }
 
 void TcpFilter::updateLastAcknowledgment(uint32_t acknowledgmentNumber, TcpFilter::TcpTransmissionControlBlock &TCB)
@@ -89,7 +89,7 @@ void TcpFilter::initTCB(const TcpPacket &packet, TcpFilter::TcpTransmissionContr
                         TcpFilter::TcpTransmissionControlBlock &anotherTCB) {
     TCB.port = packet.getSourcePort();
 
-    TCB.window.initSequence(packet.getSequenceNumber(), packet.getSegementLength());
+    TCB.window.initSequence(packet.getSequenceNumber(), static_cast<uint32_t>(packet.getSegementLength()));
     anotherTCB.windowShift = 0;
     anotherTCB.window.initWindow(packet.getWindowSize());
 }
@@ -108,13 +108,13 @@ void TcpFilter::initWindowShift(const TcpPacket &packet, TcpTransmissionControlB
         TCB.windowShift = packet.getParser().getOption<uint8_t>(TcpOptionID::WindowScale);
     }
 
-    updateWindowSize(TCB.window.getWindowSize(), TCB);
+    updateWindowSize(static_cast<uint16_t>(TCB.window.getWindowSize()), TCB);
     if(isSecond)
-        updateWindowSize(anotherTCB.window.getWindowSize(), anotherTCB);
+        updateWindowSize(static_cast<uint16_t>(anotherTCB.window.getWindowSize()), anotherTCB);
 }
 
 TcpFilter::DropReasonType TcpFilter::successUpdate(uint32_t sequenceNumber, uint32_t acknowledgmentNumber,
-                                                        uint32_t windowSize, uint32_t segementLength) {
+                                                        uint16_t windowSize, uint32_t segementLength) {
     // We'll check if the received sequenceNumber is greather than the previous ones.
     // In order to do that, we'll check if ACK > lastACK (if this is a new ACK).
     // And we'll check if there's a hole in the sequences, if there is,
@@ -151,7 +151,7 @@ TcpFilter::DropReasonType TcpFilter::successUpdate(uint32_t sequenceNumber, uint
  *  > Yes!
  *
  *  > Client: Syn.
- *  > Server: Syn\Ack.
+ *  > Server: Syn/Ack.
  *  > Client: Ack.
  *
  * R=receive
@@ -253,16 +253,12 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
         setTcpState(Established);
 
         goto SuccessUpdate;
-
-        break;
     case Established:   
         // If we are the starting a finish as a passive side.
         if(filteredPacket.getFinishFlag())
             setTcpState(CloseWait);
 
         goto SuccessUpdate;
-
-        break;
     case CloseWait:
         // On CloseWait, we still have the option to send data (and receive acknowledgments)
         if(filteredPacket.isDataPacket() == true)
@@ -270,7 +266,6 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
         else
             goto SuccessUpdate;
 
-        break;
     case FinishWait1:
         // If this is packet is both finish and ack combined, skip the FinishWait2 (Which waits for FIN).
         if(filteredPacket.getFinishFlag()) {
@@ -287,8 +282,6 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
             return FinishRequired;
         }
 
-        break;
-
     case FinishWait2:
         // We got the finish from the passive side. In finish wait 2 we also should receive packet.
         if(filteredPacket.getFinishFlag())
@@ -296,7 +289,6 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
 
         goto SuccessUpdate;
 
-        break;
     case LastAck:
         // Client got the last ACK.
         if(mTcpSession.our.window.willBeSynced(acknowledgmentNumber)) {
@@ -306,7 +298,6 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
             return SyncedAcknowledgmentRequired;
         }
 
-        break;
     case Closing:
         if(mTcpSession.our.window.willBeSynced(acknowledgmentNumber)) {
             setTcpState(TimeWait);
@@ -316,11 +307,9 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
             return SyncedAcknowledgmentRequired;
         }
 
-        break;
     case TimeWait:
         return StreamClosedForRead;
 
-        break;
     default:
         pl_debug("** Default reached, Tcp state: " << mTcpSession.tcpState);
 
@@ -331,7 +320,10 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
     return DropReason::NoReason;
 
 SuccessUpdate:
-    return successUpdate(sequenceNumber, acknowledgmentNumber, filteredPacket.getWindowSize(), segementLength);
+    return successUpdate(sequenceNumber,
+                         acknowledgmentNumber,
+                         filteredPacket.getWindowSize(),
+                         static_cast<uint32_t>(segementLength));
 }
 
 TcpFilter::DropReasonType TcpFilter::checkByProtocol(const TcpPacket &filteredPacket) {
@@ -372,6 +364,8 @@ void TcpFilter::filterByPacket(const TcpPacket &filteringPacket) {
 
             return;
         }
+
+        break;
 
     default:
         break;
@@ -424,7 +418,7 @@ void TcpFilter::filterByPacket(const TcpPacket &filteringPacket) {
     }
 
     if(filteringPacket.getSequenceNumber() == mTcpSession.our.window.getNextSequence())
-        mTcpSession.our.window.onPacketReceivedInWindow(filteringPacket.getSegementLength());
+        mTcpSession.our.window.onPacketReceivedInWindow(static_cast<uint32_t>(filteringPacket.getSegementLength()));
 
     if(filteringPacket.getAcknowledgmentFlag())
         updateLastAcknowledgment(filteringPacket.getAcknowledgmentNumber(), mTcpSession.your);
@@ -434,14 +428,14 @@ void TcpFilter::filterByPacket(const TcpPacket &filteringPacket) {
 
 uint32_t TcpFilter::TcpSession::SequenceRanges::onSequencalSequenceReceived(uint32_t sequenceNumber, OctetVector::SizeType segementSize,
                                                                             TcpSequenceNumber::TcpSequenceWindow &tcpSequenceWindow) {
-    uint32_t nextSequenceNumber = sequenceNumber+segementSize;
+    uint32_t nextSequenceNumber = sequenceNumber+static_cast<uint32_t>(segementSize);
     auto iterator = mSequenceRangesMap.begin();
 
     while(iterator != mSequenceRangesMap.end()) {
         if(iterator->first != nextSequenceNumber)
             break;
 
-        tcpSequenceWindow.onPacketReceivedInWindow(iterator->second);
+        tcpSequenceWindow.onPacketReceivedInWindow(static_cast<uint32_t>(iterator->second));
         nextSequenceNumber += iterator->second;
         iterator = mSequenceRangesMap.erase(iterator);
     }

@@ -51,7 +51,7 @@ public:
      * @brief parse  Parse the attributes into attrs map.
      * @param data  Data to parse.
      */
-    virtual void parse(const OctetVector &data) override final;
+    virtual void parse(OctetVector::const_iterator begin, OctetVector::const_iterator end) override final;
 
     /**
      * @brief toData  Unparse the data: convert the map to an bytes vector.

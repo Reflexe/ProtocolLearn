@@ -26,13 +26,15 @@
 
 #include "BasicProtocol.h"
 
+#include "CompilerFunctions.h"
+
 namespace ProtocolLearn {
 
 class TransportProtocol : public BasicProtocol
 {
 public:
     TransportProtocol();
-    virtual ~TransportProtocol() = default;
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(TransportProtocol)
 };
 
 } // namespace ProtocolLearn

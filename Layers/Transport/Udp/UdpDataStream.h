@@ -38,7 +38,9 @@ namespace Udp {
 class UdpDataStream : public DataStreamUnderPacketStream<UdpStream>
 {
 public:
-    UdpDataStream(UdpStream &udpStream, uint16_t destinationPort, uint16_t sourcePort=Random::getMediumRandomNumber());
+    UdpDataStream(UdpStream &udpStream,
+                  uint16_t destinationPort,
+                  uint16_t sourcePort=static_cast<uint16_t>(Random::getMediumRandomNumber()));
 };
 
 } // namespace Udp

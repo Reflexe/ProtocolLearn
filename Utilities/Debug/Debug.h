@@ -49,7 +49,7 @@ public:
         using RuntimeError::RuntimeError;
     };
 
-    static void assert(bool result, const char *expr, const char *functionName, int line, const char *fileName);
+    static void assert(bool result, const char *expr, const char *functionName, int line, const char *);
 
     constexpr static auto &debug = std::cerr;
     constexpr static auto &crap  = debug;

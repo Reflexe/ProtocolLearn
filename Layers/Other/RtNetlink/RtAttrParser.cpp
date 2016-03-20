@@ -30,10 +30,10 @@ namespace ProtocolLearn {
 RtattrParser::RtattrParser()
 { }
 
-void RtattrParser::parse(const OctetVector &data) {
-    const rtattr *prtattr = &data.getAsObject<rtattr>();
-    OctetVector::SizeType dataToParseLength = data.size();
-    const OctetVector::size_type dataLength = data.size();
+void RtattrParser::parse(OctetVector::const_iterator begin, OctetVector::const_iterator end) {
+    const rtattr *prtattr = reinterpret_cast<const rtattr*>(&(*begin));
+    OctetVector::SizeType dataToParseLength = static_cast<OctetVector::SizeType>(end-begin);
+    const OctetVector::size_type dataLength = dataToParseLength;
 
     while(RTA_OK(prtattr, dataToParseLength)) {
         // If rta_len + the data we've parsed is greather than dataLength. It's assert because we're talking to the Linux kernel.
@@ -55,7 +55,7 @@ OctetVector RtattrParser::toOctetVector() const{
 
     for(const auto &attribute : mOptionsMap) {
         attr.rta_type = attribute.first;
-        attr.rta_len = RTA_LENGTH(attribute.second.data.size());
+        attr.rta_len = static_cast<unsigned short>(RTA_LENGTH(attribute.second.data.size()));
 
         attributeTempData = OctetVector::fromObject(attr);
 

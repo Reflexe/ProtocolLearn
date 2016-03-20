@@ -86,7 +86,7 @@ public:
 
     static TcpDataStream connect(TcpStream &tcpStream,
                                  uint16_t destinationPort,
-                                 uint16_t sourcePort=Random::getMediumRandomNumber());
+                                 uint16_t sourcePort=static_cast<uint16_t>(Random::getMediumRandomNumber()));
     /**
      * @brief Takes a TcpStream in SynRecieved and return a TcpDataStream when it in Established.
      * @param tcpStream

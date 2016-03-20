@@ -34,7 +34,7 @@ add_subdirectory(BasicProtocol)
 
 add_subdirectory(StringFunctions)
 
-add_subdirectory(DynamicRuleParser)
+#add_subdirectory(DynamicRuleParser)
 add_subdirectory(Convertions)
 
 add_subdirectory(MacAddress)

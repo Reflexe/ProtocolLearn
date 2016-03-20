@@ -41,7 +41,7 @@ void Ipv4Packet::updateHeaderLength() {
         return setInvalidPacket(ParsingError::InvalidInternetHeaderLength);
     }
 
-    setInternetHeaderLength(newSize/4);
+    setInternetHeaderLength(static_cast<uint8_t>(newSize/4));
 }
 
 void Ipv4Packet::onPacketExport() {
@@ -123,8 +123,8 @@ void Ipv4Packet::onPacketImport() {
     mMiniPacket.destination = ByteOrder::networkToHost(getHeader().destinationAddress);
     mMiniPacket.source = ByteOrder::networkToHost(getHeader().sourceAddress);
 
-    if(internetHeaderLength > 5)
-        mOptionsParser.parse(getUnrequiredHeader());
+    if(internetHeaderLength > 5 && isUnrequiredHeaderPacket())
+        mOptionsParser.parse(getUnrequiredHeaderBegin(), getUnrequiredHeaderEnd());
     else
         mOptionsParser.clearOptions();
 }

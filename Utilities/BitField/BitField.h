@@ -32,6 +32,13 @@
 
 namespace ProtocolLearn {
 
+#define BIT_FIELD_SET(var, begin, length, value) ((var) = BitField<decltype(var)>::setPositionAndReturn<begin, length>((var), (value)))
+#define BIT_FIELD_GET(var, begin, length) (BitField<decltype(var)>::getPosition<begin, length>((var)))
+
+#define BIT_FIELD_GET_NET(var, begin, length) (BIT_FIELD_GET(ByteOrder::networkToHost((var)) (begin), (length)))
+#define BIT_FIELD_SET_NET(var, begin, length, value) ((ByteOrder::hostToNetwork((var))\
+    = BitField<decltype(var)>::setPositionAndReturn<begin, length>(ByteOrder::networkToHost((var)), (value))))
+
 template<typename _Type>
 struct BitField {
     typedef _Type FieldType;

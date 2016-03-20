@@ -21,23 +21,15 @@
  * @section DESCRIPTION
  *
  */
-
-#ifndef PROTOCOLLEARN_BASICPROTOCOL_H
-#define PROTOCOLLEARN_BASICPROTOCOL_H
-
-#include "DataStream.h"
+#include "DnsPacket.h"
 
 namespace ProtocolLearn {
+namespace Dns {
 
-class BasicProtocol : public DataStream
+DnsPacket::DnsPacket()
 {
-public:
-    BasicProtocol();
-    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(BasicProtocol)
 
-    virtual OctetVector::SizeType getMaximumSendDataLength() = 0;
-};
+}
 
+} // namespace Dns
 } // namespace ProtocolLearn
-
-#endif // PROTOCOLLEARN_BASICPROTOCOL_H

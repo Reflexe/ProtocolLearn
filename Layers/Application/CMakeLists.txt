@@ -1,1 +1,2 @@
-add_subdirectory(Dns)
+add_subdirectory(DNS)
+

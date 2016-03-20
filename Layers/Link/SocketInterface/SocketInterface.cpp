@@ -35,7 +35,7 @@ SocketInterface::SocketInterface(const Interface &interface)
     ::memset(&sockaddr, 0, sizeof(sockaddr));
 
 //    macAddress.copyNumeric(sockaddr.sll_addr);     /* Address */
-    sockaddr.sll_ifindex = interface.getIndex();   /* Interface Index */
+    sockaddr.sll_ifindex = static_cast<int>(interface.getIndex());   /* Interface Index */
     sockaddr.sll_halen = 0;
     sockaddr.sll_hatype = ARPHRD_ETHER;
     sockaddr.sll_family = AF_PACKET;
@@ -74,7 +74,7 @@ void SocketInterface::setPromiscuousMode(bool status) {
 
     ::memset(&packet_req, 0, sizeof(packet_req));
 
-    packet_req.mr_ifindex = mInterface.getIndex();
+    packet_req.mr_ifindex = static_cast<int>(mInterface.getIndex());
     packet_req.mr_type = PACKET_MR_PROMISC;
     packet_req.mr_alen = MacAddress::MacAddressLength;
 

@@ -166,7 +166,7 @@ uint32_t InterfaceFunctions::getMTUByInterfaceName(const std::string &name) cons
 
     ioctlTalk(SIOCGIFMTU, ifr);
 
-    return ifr.ifr_ifru.ifru_mtu;
+    return static_cast<uint32_t>(ifr.ifr_ifru.ifru_mtu);
 }
 
 } // ProtocolLearn
