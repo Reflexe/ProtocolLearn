@@ -31,17 +31,20 @@
 namespace ProtocolLearn {
 namespace Tcp {
 
-TcpDataStream TcpDataStream::connect(TcpStream &tcpStream, uint16_t destinationPort, uint16_t sourcePort) {
+TcpDataStream TcpDataStream::connect(TcpStream &tcpStream,
+                                     uint16_t destinationPort,
+                                     const Timeout &timeout,
+                                     uint16_t sourcePort) {
     tcpStream.setTcpState(TcpFilter::Closed);
     TcpDataStream tcpDataStream{tcpStream, destinationPort, sourcePort};
 
     // Send the syn.
     tcpDataStream.sendPacketInWindow(TcpPacketType::SynPacket, static_cast<uint32_t>(Random::getMediumRandomNumber()));
-    tcpDataStream.sync(); // Receive the syn/ack and ack it (maybe retransmit the syn as well).
+    tcpDataStream.sync(timeout); // Receive the syn/ack and ack it (maybe retransmit the syn as well).
 
     // You might send only an ACK, wait for an syn.
     if(tcpDataStream.getTcpState() == TcpFilter::SynSent) {
-        if(tcpDataStream.waitForPacket(TcpPacketType::SynPacket) == false)
+        if(tcpDataStream.waitForPacket(TcpPacketType::SynPacket, timeout) == false)
             throw Timeout::TimeoutException{"TcpDataStream::tcpConnect"};
     }
 
@@ -52,14 +55,14 @@ TcpDataStream TcpDataStream::connect(TcpStream &tcpStream, uint16_t destinationP
     return tcpDataStream;
 }
 
-TcpDataStream TcpDataStream::completeAccept(TcpStream &tcpStream, TcpFilter::TcpSession &tcpSession) {
+TcpDataStream TcpDataStream::completeAccept(TcpStream &tcpStream, TcpFilter::TcpSession &tcpSession, const Timeout &timeout) {
     tcpStream.getFilter().getSession() = tcpSession;
     pl_assert(tcpStream.getTcpSession().tcpState == TcpFilter::SynReceived);
 
     TcpDataStream tcpDataStream{tcpStream, tcpSession.your.port, tcpSession.our.port};
 
     tcpDataStream.sendPacketInWindow(TcpPacketType::SynAckPacket, static_cast<uint32_t>(Random::getMediumRandomNumber()));
-    tcpDataStream.sync();
+    tcpDataStream.sync(timeout);
 
     pl_assert(tcpDataStream.getTcpState() == TcpFilter::Established);
 
@@ -75,8 +78,8 @@ TcpDataStream::TcpDataStream(TcpStream &tcpStream, uint16_t destinationPort, uin
 
     updateDropHandler();
 
-    getPacketStream().setTimeout(PTime{0, 70000});
-    setTimeout(PTime{2, 0});
+//    getPacketStream().setTimeout(PTime{0, 70000});
+//    setTimeout(PTime{2, 0});
 
     getYourTCB().window.initWindow(TEMP_WINDOW_SIZE);
     getYourTCB().windowShift = 0;
@@ -97,20 +100,18 @@ TcpDataStream::TcpDataStream(TcpDataStream &&tcpDataStream)
     updateDropHandler(); // Yes. that's all.
 }
 
-OctetVector TcpDataStream::receiveData() {
+OctetVector TcpDataStream::receiveData(const Timeout &timeout) {
     if(mMinimumReceiveDataSize == 1)
-        return _recv();
+        return _recv(timeout);
 
     pl_assert(mMinimumReceiveDataSize < getYourTCB().window.getWindowSize());
-
-    Timeout timeout{getTimeout(), true};
 
     while(mReceiveQueue.getCurrentSize() < mMinimumReceiveDataSize) {
         if(timeout.isPassed())
             throw Timeout::TimeoutException{"TcpDataStream::receiveData"};
 
         checkIfStreamReadConnected("TcpDataStream::receiveData");
-        waitForPacket(TcpPacketType::DataPacket);
+        waitForPacket(TcpPacketType::DataPacket, timeout);
     }
 
     OctetVector data{mReceiveQueue.pop_front()};
@@ -153,11 +154,9 @@ void TcpDataStream::_send(OctetVector &&data){
     }
 }
 
-OctetVector TcpDataStream::_recv() {
+OctetVector TcpDataStream::_recv(const Timeout &timeout) {
     if(mReceiveQueue.empty()) {
-        Timeout timeout{getTimeout(), true};
-
-        while(waitForPacket(TcpPacketType::DataPacket) == false || mReceiveQueue.empty()) {
+        while(waitForPacket(TcpPacketType::DataPacket, timeout) == false || mReceiveQueue.empty()) {
             if(timeout.isPassed())
                 throw Timeout::TimeoutException{"TcpDataStream::_recv"};
 
@@ -173,43 +172,37 @@ OctetVector TcpDataStream::_recv() {
     return data;
 }
 
-void TcpDataStream::setTimeout(const Timeout::TimeType &time)
-{
-    return DataStreamUnderPacketStream::setTimeout(time);
-}
-
 void TcpDataStream::setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize)
 {   // Skip the DataStreamUnderPacketStream's overriden function: we want the packets even if they don't have any data.
     return DataStream::setMinimumReceiveDataSize(minimumDataSize);
 }
 
-void TcpDataStream::sync(bool sendACKs) {
+void TcpDataStream::sync(const Timeout &timeout, bool sendACKs) {
+    pl_assert(timeout.howMuchTimeDoWeHave() > mRetransmitionTimeout);
+
     // If we're already synced.
     if(getOurTCB().window.isSynced())
         return;
 
-    Timeout timeout{getTimeout(), true};
+    do {
+        if (mRetransmitQueue.empty())
+            return;
 
-    while(waitForPacket(TcpPacketType::SycedAck, sendACKs) == false) {
-        if(timeout.isPassed() == true)
+        if (timeout.isPassed() == true)
             throw Timeout::TimeoutException{"TcpDataStream::sync"};
 
-        pl_assert(mRetransmitQueue.empty() == false);
-
         retransmitPackets();
-    }
+    } while (waitForPacket(TcpPacketType::SycedAck, mRetransmitionTimeout, sendACKs) == false);
 }
 
-void TcpDataStream::close() {
+void TcpDataStream::close(const Timeout &timeout) {
     if(getTcpState() == TcpFilter::Closed)
         return;
 
     // First of all, sync:
-    sync(false); // The send queue.
+    sync(timeout, false); // The send queue.
 
-    getPacketStream().setTimeout(PTime::zero());
-    waitForPacket(TcpPacketType::DataPacket, false); // The receive queue, we'll ack this packets in the FIN packet.
-    getPacketStream().setTimeout(PTime{0, 70000});
+    waitForPacket(TcpPacketType::DataPacket, PTime::zero(), false); // The receive queue, we'll ack this packets in the FIN packet.
 
     // The state may change after calling sync() and waitForPacket().
     if(getTcpState() == TcpFilter::Closed)
@@ -221,8 +214,8 @@ void TcpDataStream::close() {
      *
      * If we in Established, we should send finish and go to FinishWait1.
      * Then:
-     *     If we received a Finish (Two Active CLOSE), we should reply with ACK and receive an ACK (Closing).
-     *     If we received a ACK (We're waiting for the other side to call CLOSE) (FinishWait2).
+     *     If we received a Finish (Two Active CLOSE), we should reply with an ACK and receive an ACK (Closing).
+     *     If we received an ACK (We're waiting for the other side to call CLOSE) (FinishWait2).
      *     If we received a Finish+ACK, we in the end and we should reply with ACK (TimeWait).
      */
 
@@ -230,13 +223,12 @@ void TcpDataStream::close() {
     sendPacketInWindow(TcpPacketType::FinishPacket, getOurTCB().window.getNextSequence());
 
     pl_crap("receiving something");
-    sync();
+    sync(timeout);
 
     switch (getTcpState()) {
     case TcpFilter::FinishWait2:
         // Recive fin and ack it.
-        getPacketStream().setTimeout(PTime{2, 0});
-        if(waitForPacket(TcpPacketType::FinishPacket) == false)
+        if(waitForPacket(TcpPacketType::FinishPacket, timeout) == false)
             throw Timeout::TimeoutException{"TcpDataStream::close"};
 
         pl_assert(getTcpState() == TcpFilter::TimeWait);
@@ -248,14 +240,14 @@ void TcpDataStream::close() {
         // sync already sent an acknowledgment.
 
         break;
-
-    case TcpFilter::Closing:
-        // sync already sent an acknowledgment.
-
-        break;
     case TcpFilter::Closed:
         break;
+
+        // Closing: sync should send an ACK for the FIN it received and receive one for the one we sent.
+        // And then we'll be in Closed.
     default:
+        pl_debug("default reached, TCP state:" << getTcpState());
+
         pl_assert(false);
         break;
     }
@@ -449,16 +441,19 @@ void TcpDataStream::sendReset(const TcpPacket &tcpPacket) {
     getSendPacket().setResetFlag(false);
 }
 
-bool TcpDataStream::waitForPacket(TcpPacketType packetToReceive, bool sendACKs) {
+bool TcpDataStream::waitForPacket(TcpPacketType packetToReceive, const Timeout &timeout, bool sendACKs) {
     TcpPacket receivedPacket;
     auto currentTcpState = getTcpState();
 
     while(true) {
+        if (timeout.isPassed())
+            return false;
+
         auto ourLastAcknowledgment = getOurTCB().window.getLastAcknowledgment();
 
         try
         {
-            getPacketStream().receivePacket(receivedPacket);
+            getPacketStream().receivePacket(receivedPacket, timeout);
         } catch(Timeout::TimeoutException &)
         {
             return false;

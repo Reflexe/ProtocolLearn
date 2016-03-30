@@ -86,13 +86,14 @@ public:
 
     static TcpDataStream connect(TcpStream &tcpStream,
                                  uint16_t destinationPort,
+                                 const Timeout &timeout,
                                  uint16_t sourcePort=static_cast<uint16_t>(Random::getMediumRandomNumber()));
     /**
      * @brief Takes a TcpStream in SynRecieved and return a TcpDataStream when it in Established.
      * @param tcpStream
      * @return
      */
-    static TcpDataStream completeAccept(TcpStream &tcpStream, TcpFilter::TcpSession &tcpSession);
+    static TcpDataStream completeAccept(TcpStream &tcpStream, TcpFilter::TcpSession &tcpSession, const Timeout &timeout);
 
     /**
      * @brief Receive data with the data length filter.
@@ -101,7 +102,7 @@ public:
      * By default, we're dropping packet without the required length.
      * With TCP, we should wait until we receive enough data.
      */
-    virtual OctetVector receiveData() override;
+    virtual OctetVector receiveData(const Timeout &timeout) override;
 
     /**
      * @brief Send data in the TCP.
@@ -123,14 +124,7 @@ public:
      * (by receiving of FIN or RST packet). The function will send ack for the packets it receives, even
      * if they're FIN or RST packets).
      */
-    virtual OctetVector _recv() override;
-
-    /**
-     * @brief Set a timeout for the general operations like _recv(), _send() and sync().
-     * @param seconds
-     * @param useconds
-     */
-    virtual void setTimeout(const Timeout::TimeType &time) override;
+    virtual OctetVector _recv(const Timeout &timeout) override;
 
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize) override;
 
@@ -143,7 +137,7 @@ public:
      * After calling this function you can be sure that your packet sent (as long as you don't
      * get an exception)
      */
-    void sync(bool sendACKs=true);
+    void sync(const Timeout &timeout, bool sendACKs=true);
 
     /**
      * @brief Sync and close the TCP stream.
@@ -151,7 +145,7 @@ public:
      *
      * Sync the receive and the send queues, send a FIN packet and wait for response.
      */
-    void close();
+    void close(const Timeout &timeout);
 
     /**
      * @brief Checking if the stream is in Established mode.
@@ -195,7 +189,7 @@ private:
     void sendPacket(TcpPacketType packetType, uint32_t sequenceNumber);
     void sendPacketInWindow(TcpPacketType packetType, uint32_t sequenceNumber);
 
-    bool waitForPacket(TcpPacketType packetToReceive, bool sendACKs=true);
+    bool waitForPacket(TcpPacketType packetToReceive, const Timeout &timeout, bool sendACKs=true);
 
     TcpFilter::TcpTransmissionControlBlock &getOurTCB();
     TcpFilter::TcpTransmissionControlBlock &getYourTCB();
