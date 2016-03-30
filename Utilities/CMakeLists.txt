@@ -4,6 +4,7 @@ add_subdirectory(Exceptions)
 add_subdirectory(Debug)
 
 add_subdirectory(OctetVector)
+add_subdirectory(SmartVector)
 add_subdirectory(ByteOrder)
 add_subdirectory(InternetChecksum)
 
