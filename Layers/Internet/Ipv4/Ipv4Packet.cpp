@@ -58,7 +58,7 @@ void Ipv4Packet::onPacketExport() {
 }
 
 void Ipv4Packet::fromRawPacket(OctetVector &&rawPacket) {
-    OctetVector::SizeType headerSize = BitField<uint8_t>::getPosition<0, 4>(rawPacket.getAsObject<Ipv4Header>().versionAndHeaderLength) * 4;
+    OctetVector::SizeType headerSize = BitField<uint8_t>::getPosition<4, 4>(rawPacket.getAsObject<Ipv4Header>().versionAndHeaderLength) * 4;
 
     if(headerSize > rawPacket.size() || headerSize < getMinimumHeaderLength())
         return PacketWrapper::fromRawPacket(std::move(rawPacket), getMinimumHeaderLength());
@@ -108,9 +108,6 @@ bool Ipv4Packet::isChecksumValid() const{
 
 void Ipv4Packet::onPacketImport() {
     auto internetHeaderLength = getInternetHeaderLength();
-
-    // Just to check the new fromRawPacket function.
-    pl_assert(internetHeaderLength*4 == getHeaderLength());
 
     mParsingError = ParsingError::None;
 
