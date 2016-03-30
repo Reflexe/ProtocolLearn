@@ -23,16 +23,20 @@
  */
 #include "DnsDomain.h"
 
+#include <algorithm>
+
 namespace ProtocolLearn {
 namespace Dns {
 
-std::pair<bool, OctetVector::SizeType> DnsDomain::fromData(const OctetVector::const_iterator &begin,
+std::pair<bool, OctetVector::SizeType> DnsDomain::fromData(const OctetVector::const_iterator &realBegin,
+                                                           const OctetVector::const_iterator &begin,
                                                            const OctetVector::const_iterator &end) {
-    auto iterator = begin;
+    pl_assert(realBegin <= begin);
 
-    if (iterator == end)
+    if (begin == end)
         return {false, 0};
 
+    auto iterator = begin;
     mIteratorsList.clear();
 
     /**
@@ -44,44 +48,51 @@ std::pair<bool, OctetVector::SizeType> DnsDomain::fromData(const OctetVector::co
       * each label.
       */
     do {
-        uint8_t labelLength = *iterator;
-        ++iterator;
+        uint8_t lengthOctet = *iterator;
 
-        if (labelLength == 0)
+        if (lengthOctet == 0)
             break;
 
-        if ((iterator+labelLength) > end)
-            return {false, 0};
+        // If this is a pointer.
+        if ((lengthOctet & LabelPointerBitsSignture) == LabelPointerBitsSignture) {
+            uint8_t pointer = lengthOctet & ~LabelPointerBitsSignture;
 
-        mIteratorsList.emplace_back(iterator, iterator+labelLength);
-        iterator += labelLength;
+            if ((end-realBegin) <= static_cast<OctetVector::difference_type>(pointer)
+                    || !addLabel(realBegin+pointer, end))
+                return {false, 0};
+
+            continue;
+        }
+
+        if (addLabel(iterator, end) == false)
+            return {false, 0};
     } while (iterator < end);
 
-
-    if (!mIteratorsList.empty())
-        mDomainData.assign(begin, iterator);
+    mDomainDatas = convertIteratorsListToOctetVectorList(mIteratorsList);
 
     return {true, static_cast<OctetVector::SizeType>(iterator-begin)};
 }
 
 bool DnsDomain::fromString(const std::string &string) {
-    mDomainData.assign(string.begin(), string.end());
+    mIteratorsList.clear();
 
-    mDomainData.insert(mDomainData.begin(), 0);
-// www.google.co.il
-// \3www\6google\2co\2il
+    mDomainDatas.assign(1, OctetVector{string.begin(), string.end()});
+    auto &domainData = mDomainDatas.front();
 
-    auto labelBegin = mDomainData.begin();
+    domainData.insert(domainData.begin(), 0);
+
+    auto labelBegin = domainData.begin();
     auto labelEnd = labelBegin;
 
-    while ((labelEnd = std::find(labelEnd+1, mDomainData.end(), '.')) == mDomainData.end()) {
-        *labelBegin = static_cast<uint8_t>(labelEnd-labelBegin);
+    while ((labelEnd = std::find(labelEnd+1, domainData.end(), '.')) == domainData.end()) {
+//        *labelBegin = static_cast<uint8_t>(labelEnd-labelBegin);
 
+        addLabel(labelBegin, labelEnd);
         labelBegin = labelEnd;
     }
 
-    *labelBegin = static_cast<uint8_t>(mDomainData.end()-labelBegin);
-    mDomainData.push_back(0);
+    *labelBegin = static_cast<uint8_t>(domainData.end()-labelBegin);
+    domainData.push_back(0);
 
     return true;
 }
@@ -98,6 +109,35 @@ std::string DnsDomain::toString() const{
     string.pop_back();
 
     return string;
+}
+
+bool DnsDomain::addLabel(const OctetVector::const_iterator &begin,
+                         const OctetVector::const_iterator &end) {
+    pl_assert(end > begin);
+
+    uint8_t labelLength = *begin;
+
+    if (labelLength >= (end-begin))
+        return false;
+
+    mIteratorsList.emplace_back(begin+1, begin+labelLength);
+
+    return true;
+}
+
+std::deque<OctetVector>
+DnsDomain::convertIteratorsListToOctetVectorList(DnsDomain::IteratorListType &iteratorsList) {
+    std::deque<OctetVector> octetVectors;
+
+    for (auto &labelBeginAndEnd : iteratorsList) {
+        octetVectors.emplace_back(labelBeginAndEnd.first,
+                                  labelBeginAndEnd.second);
+
+        labelBeginAndEnd.first = octetVectors.back().begin();
+        labelBeginAndEnd.second = octetVectors.back().end();
+    }
+
+    return octetVectors;
 }
 
 } // namespace Dns

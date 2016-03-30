@@ -26,6 +26,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 
 #include "OctetVector.h"
 
@@ -36,9 +37,13 @@ namespace Dns {
 class DnsDomain
 {
 public:
+    constexpr static uint8_t LabelPointerBitsSignture = 192;
+
     DnsDomain();
 
-    std::pair<bool, OctetVector::SizeType> fromData(const OctetVector::const_iterator &begin, const OctetVector::const_iterator &end);
+    std::pair<bool, OctetVector::SizeType> fromData(const OctetVector::const_iterator &realBegin,
+                                                    const OctetVector::const_iterator &begin,
+                                                    const OctetVector::const_iterator &end);
     bool fromString(const std::string &string);
 
     std::string toString() const;
@@ -46,7 +51,11 @@ public:
 private:
     typedef std::vector<std::pair<OctetVector::const_iterator, OctetVector::const_iterator>> IteratorListType;
 
-    OctetVector mDomainData;
+    bool addLabel(const OctetVector::const_iterator &begin,
+                  const OctetVector::const_iterator &end);
+    std::deque<OctetVector> convertIteratorsListToOctetVectorList(IteratorListType &iteratorsList);
+
+    std::deque<OctetVector> mDomainDatas;
     IteratorListType mIteratorsList;
 };
 

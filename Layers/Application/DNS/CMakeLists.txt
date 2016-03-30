@@ -1,4 +1,4 @@
-pl_add_library(DNS DnsPacket DnsStream DnsFilter)
+pl_add_library(DNS DnsPacket DnsStream DnsFilter DnsDomain)
 
 include ( ../../pl_protocol.cmake )
 
