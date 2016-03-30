@@ -34,19 +34,22 @@
 
 #include "Random.h"
 
+int usage(const char *programName);
+ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType ipv4FilterFunction(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet);
+
 int usage(const char *programName) {
     std::cout << "Usage: " << programName << " [Ipv4 Address] <Data>" << std::endl;
 
     return EXIT_FAILURE;
 }
 
-bool ipv4FilterFunction(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet)
+ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType ipv4FilterFunction(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet)
 {
-    return ipv4Packet.getProtocol() == IPPROTO_ICMP;
+    return ipv4Packet.getProtocol() == IPPROTO_ICMP ? ProtocolLearn::Ipv4::Ipv4Filter::None : ProtocolLearn::Ipv4::Ipv4Filter::NoReason;
 }
 
 int main(int argc, char *argv[]) {
-    if(argc < 2 && argc > 3)
+    if(argc != 2)
         return usage(argv[0]);
 
     using ProtocolLearn::Ipv4Address;
@@ -68,11 +71,10 @@ int main(int argc, char *argv[]) {
     Ipv4DataStream ipv4DataStream{smartIpv4Stream.getIpv4Stream(), destination, IPPROTO_ICMP, smartIpv4Stream.getSocketInterface().getIpv4Address()};
 
     IcmpStream icmpStream{ipv4DataStream};
-    icmpStream.setTimeout(ProtocolLearn::PTime{1, 0});
 
     IcmpPacket icmpPacket;
-    icmpPacket.setSequence(Random::getMediumRandomNumber());
-    icmpPacket.setId(Random::getMediumRandomNumber());
+    icmpPacket.setSequence(static_cast<uint16_t>(Random::getMediumRandomNumber()));
+    icmpPacket.setId(static_cast<uint16_t>(Random::getMediumRandomNumber()));
     icmpPacket.setType(ICMP_ECHO);
     icmpPacket.setCode(0);
 
@@ -95,7 +97,7 @@ int main(int argc, char *argv[]) {
 
         try
         {
-            icmpStream.receivePacket(receivedPacket);
+            icmpStream.receivePacket(receivedPacket, ProtocolLearn::PTime{1, 0});
         }
         catch(ProtocolLearn::Timeout::TimeoutException &) {
             std::cout << +ttl << ": ** No Response, continuing to the next host..." << std::endl;
@@ -107,8 +109,6 @@ int main(int argc, char *argv[]) {
 
             return EXIT_FAILURE;
         }
-
-
 
         std::cout << +ttl << ": " << ipv4DataStream.getReceivePacket().getSource().toString() << std::endl;
 

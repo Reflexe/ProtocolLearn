@@ -38,7 +38,7 @@ class SocketInterface : public BasicInterface
 public:
     SocketInterface(const Interface &interface);
 
-    virtual OctetVector _recv() override;
+    virtual OctetVector _recv(const Timeout &timeout) override;
     virtual void _send(OctetVector &&data) override;
 
     void setPromiscuousMode(bool status);
@@ -58,6 +58,8 @@ public:
 private:
     Socket mSocket{AF_PACKET, SOCK_RAW, ByteOrder::hostToNetwork(static_cast<uint16_t>(ETH_P_ALL))};
     Interface mInterface;
+
+    PTime mCurrentTimeout{PTime::infinity()};
 };
 
 } // namespace ProtocolLearn

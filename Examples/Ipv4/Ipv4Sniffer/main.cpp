@@ -5,11 +5,12 @@
 
 using namespace ProtocolLearn;
 
-
-
 std::string ethernetTypeToString(uint16_t ethernetType);
 ProtocolLearn::Ethernet::EthernetFilter::DropReasonType ethernetFilterCallback(const Ethernet::EthernetPacket &ethernetPacket);
 std::string ipv4TypeToString(uint8_t protocol);
+std::string optionTypeToString(Ipv4::Ipv4OptionIDType optionID);
+std::string ipv4PacketParsingErrorToString(Ipv4::Ipv4Packet::ParsingError parsingError);
+ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType filterCallback(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet);
 int usage(const char *programName);
 
 
@@ -185,7 +186,6 @@ int main(int argc, char *argv[]) {
 
     Ipv4Packet ipv4Packet;
 
-    smartIpv4Stream.getIpv4Stream().setTimeout(PTime::infinity());
     smartIpv4Stream.getIpv4Stream().getFilter().setProtocolFilterStatus(false);
     smartIpv4Stream.getIpv4Stream().getFilter().setPreviousPacketFilterStatus(false);
     smartIpv4Stream.getIpv4Stream().getFilter().setUserFilterStatus(true, filterCallback);
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
     Ipv4FragmentReassemblyManager fragmentReassemblers;
 
     while(true) {
-        smartIpv4Stream.getIpv4Stream().receivePacket(ipv4Packet);
+        smartIpv4Stream.getIpv4Stream().receivePacket(ipv4Packet, PTime::infinity());
 
         if (Ipv4FragmentReassembler::isFragment(ipv4Packet)) {
             pl_crap("Found a fragmented packet");

@@ -50,23 +50,15 @@ public:
     DataStreamUnderPacketStream(const DataStreamUnderPacketStream &) = delete;
     DataStreamUnderPacketStream &operator =(const DataStreamUnderPacketStream &) = delete;
 
-    virtual OctetVector _recv() override{
-        mPacketStream.receivePacket(mReceivePacket);
-        return mReceivePacket.getVectorData();
+    virtual OctetVector _recv(const Timeout &timeout) override{
+        mPacketStream.receivePacket(mReceivePacket, timeout);
+        return std::move(mReceivePacket.getVectorData());
     }
 
     virtual void _send(OctetVector &&data) override{
         mSendPacket.importData(std::move(data));
         mPacketStream.sendPacket(mSendPacket);
         mSendPacket.removeData();
-    }
-
-    virtual void setTimeout(const Timeout::TimeType &time) override{
-        if(DataStreamType::getTimeout() == time)
-            return;
-
-        DataStreamType::setTimeout(time);
-        mPacketStream.setTimeout(time);
     }
 
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize) override{

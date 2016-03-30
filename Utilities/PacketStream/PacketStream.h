@@ -51,9 +51,7 @@ public:
     {
     }
 
-    virtual ~PacketStream()
-    {
-    }
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(PacketStream)
 
     /**
      * @brief Receive packets until the packet that received meets the requirments.
@@ -62,29 +60,15 @@ public:
      * @note Use _recv() to receive every packet without filtering.
      * @note If a exception thrown, the packet will initilize.
      */
-    virtual void receivePacket(PacketType &packet) {
-        auto originalTimeout = mTimeout.getTimeToWait();
-
-        try {
-            _receivePacket(packet);
-        } catch(...) {
-            packet.reset();
-
-            if (getTimeout() != originalTimeout)
-                setTimeout(originalTimeout);
-
-            throw;
-        }
-
-        if (getTimeout() != originalTimeout)
-            setTimeout(originalTimeout);
-    }
-
-    void _receivePacket(PacketType &packet) {
-        mTimeout.start();
-
+    virtual void receivePacket(PacketType &packet, const Timeout &timeout) {
         do {
-            _recv(packet);
+            try {
+                _recv(packet, timeout);
+            } catch(...)
+            {
+                packet.reset(); // Is it really required?
+                throw;
+            }
 
             auto dropReason = mProtocolFilter.check(packet);
             if(dropReason != FilterType::None) {
@@ -97,11 +81,8 @@ public:
                 return;
             }
 
-            if (mTimeout.isPassed())
+            if (timeout.isPassed())
                 throw Timeout::TimeoutException{"PacketStream::receivePacket()"};
-
-            if (mTimeout.isInfinite() == false)
-                setTimeout(mTimeout.howMuchTimeDoWeHave());
         } while(true);
     }
 
@@ -117,18 +98,6 @@ public:
         mProtocolFilter.filterByPacket(packet);
     }
 
-    /**
-     * @brief setTimeout  Set the timeout for receivePacket().
-     * @param seconds
-     * @param useconds
-     */
-    virtual void setTimeout(const Timeout::TimeType &time)
-    {
-        mTimeout.setTimeToWait(time);
-    }
-
-    const Timeout::TimeType &getTimeout() const{ return mTimeout.getTimeToWait(); }
-
     FilterType &getFilter() { return mProtocolFilter; }
     const FilterType &getFilter() const{ return mProtocolFilter; }
 
@@ -136,7 +105,7 @@ public:
      * @brief Just receive a packet (Without any filtering)
      * @param packet  Packet in the ProtocolFilter type or derived from it.
      */
-    virtual void _recv(PacketType &packet) = 0;
+    virtual void _recv(PacketType &packet, const Timeout &timeout) = 0;
 
     /**
      * @brief Just send a packet.
@@ -163,11 +132,6 @@ private:
     FilterType mProtocolFilter;
 
     /**
-     * @brief time  Time for timeout.
-     */
-    Timeout mTimeout{0, 0};
-
-    /**
      * @brief Called when packet dropped.
      *
      * Some protocols (eg. TCP) requires an action on dropping a packet
@@ -187,13 +151,11 @@ public:
     {
     }
 
-    virtual ~PacketStream()
-    {
-    }
+    PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(PacketStream)
 
-    virtual void receivePacket(PacketType &packet)
+    virtual void receivePacket(PacketType &packet, const Timeout &timeout)
     {
-        return _recv(packet);
+        return _recv(packet, timeout);
     }
 
     virtual void sendPacket(PacketType &packet)
@@ -202,27 +164,11 @@ public:
     }
 
     virtual void _send(PacketType &packet) = 0;
-    virtual void _recv(PacketType &packet) = 0;
-
-    virtual void setTimeout(const Timeout::TimeType &time)
-    {
-        mTimeout.setTimeToWait(time);
-    }
-
-    const Timeout::TimeType &getTimeout() const
-    {
-        return mTimeout.getTimeToWait();
-    }
+    virtual void _recv(PacketType &packet, const Timeout &timeout) = 0;
 
     virtual void setMinimumDataLength(OctetVector::SizeType)
     {
     }
-
-private:
-    /**
-     * @brief mTimeout  Time for timeout.
-     */
-    Timeout mTimeout{0, 0};
 };
 
 } // ProtocolLearn

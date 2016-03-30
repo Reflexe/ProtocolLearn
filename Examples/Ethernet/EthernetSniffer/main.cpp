@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         using std::hex;
         using std::dec;
 
-        ethernetStream._recv(ethernetPacket);
+        ethernetStream._recv(ethernetPacket, ProtocolLearn::PTime::infinity());
 
         cout << "Packet captured:\t" << endl;
         cout << "\tPacket Length:\t" << dec << ethernetPacket.getPacketLength() << endl;

@@ -31,8 +31,8 @@ IPProtocolStream::IPProtocolStream(InternetProtocol &internetProtocol)
 {
 }
 
-void IPProtocolStream::_recv(IPProtocolPacket &packet) {
-    PacketStreamUnderDataStream::_recv(packet);
+void IPProtocolStream::_recv(IPProtocolPacket &packet, const Timeout &timeout) {
+    PacketStreamUnderDataStream::_recv(packet, timeout);
 
     updatePseudoHeaderRecv(packet);
 }

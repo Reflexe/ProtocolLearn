@@ -41,7 +41,7 @@ public:
     virtual ~VirtualDataStream() = default;
 
     virtual void _send(OctetVector &&data) override;
-    virtual OctetVector _recv() override;
+    virtual OctetVector _recv(const Timeout &) override;
 
     /// Insert data to the recieve queue.
     void insertData(OctetVector &&data);

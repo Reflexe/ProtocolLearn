@@ -35,7 +35,7 @@ void VirtualDataStream::_send(OctetVector &&data)
     mSendQueue.push(std::move(data));
 }
 
-OctetVector VirtualDataStream::_recv() {
+OctetVector VirtualDataStream::_recv(const Timeout &) {
     pl_assert(mReceiveQueue.empty() == false);
     if (mReceiveQueue.empty())
         return OctetVector{};

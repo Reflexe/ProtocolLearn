@@ -53,7 +53,8 @@ void IcmpDataStream::sendData(OctetVector &&data) {
 
 // What a long name!
 OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(const OctetVector::SizeType &minimumAccurecy,
-                                                                              const uint16_t maxFails) {
+                                                                              const uint16_t maxFails,
+                                                                              const Timeout &timeout) {
     OctetVector::SizeType maxSentData = 0;
     OctetVector::SizeType minFailedData = getMaximumSendDataLength()+minimumAccurecy;
 
@@ -74,7 +75,7 @@ OctetVector::SizeType IcmpDataStream::performMaxTransmissionUnitPathDiscovery(co
         sendData(std::move(data));
 
         try{
-            receiveData();
+            data = receiveData(timeout);
 
             // EPIC Programming time! BUUU HAAA!
             if(getReceivePacket().getType() == ICMP_DEST_UNREACH && getReceivePacket().getCode() == ICMP_FRAG_NEEDED)

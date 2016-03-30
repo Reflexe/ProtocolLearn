@@ -36,57 +36,22 @@ void DataStream::sendData(OctetVector &&data)
     _send(std::move(data));
 }
 
-OctetVector DataStream::receiveData() {
-    auto timeToWait = mTimeout.getTimeToWait();
-
-    try {
-        auto data = _receiveData();
-
-        // Restore the original time.
-        if(getTimeout() != timeToWait)
-            setTimeout(timeToWait);
-
-        return data;
-    } catch(...) {
-        // Restore the original time.
-        if(getTimeout() != timeToWait)
-            setTimeout(timeToWait);
-
-        throw;
-    }
-}
-
-OctetVector DataStream::_receiveData() {
-    mTimeout.start();
-
+OctetVector DataStream::receiveData(const Timeout &timeout) {
     do {
-        auto data = _recv();
+        auto data = _recv(timeout);
 
         pl_debug("checkByMinimumReceiveDataSize: " << (checkByMinimumReceiveDataSize(data) ? "Passed" : "Success"));
        if (checkByMinimumReceiveDataSize(data) == true)
            return data;
 
-       if (mTimeout.isPassed())
+       if (timeout.isPassed())
            throw Timeout::TimeoutException("DataStream::receiveData");
-
-       if (mTimeout.isInfinite() == false)
-           setTimeout(mTimeout.howMuchTimeDoWeHave());
     } while(true);
 }
 
 void DataStream::setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize)
 {
     mMinimumReceiveDataSize = minimumDataSize;
-}
-
-void DataStream::setTimeout(const Timeout::TimeType &timeout)
-{
-    mTimeout.setTimeToWait(timeout);
-}
-
-const PTime &DataStream::getTimeout() const
-{
-    return mTimeout.getTimeToWait();
 }
 
 OctetVector::SizeType DataStream::getMinimumReceiveDataSize() const

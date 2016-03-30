@@ -58,7 +58,7 @@ Route::GetRouteAnswer Route::getRoute(const Ipv4Address &addressForRouting) {
     rtNetlinkPacket.getParser().setOption<uint32_t>(RTA_DST, ByteOrder::hostToNetwork(addressForRouting.toInt()));
 
     mRtNetlinkStream.sendPacket(rtNetlinkPacket);
-    mRtNetlinkStream.receivePacket(rtNetlinkPacket);
+    mRtNetlinkStream.receivePacket(rtNetlinkPacket, PTime::infinity());
 
     const auto &parser = rtNetlinkPacket.getParser();
     GetRouteAnswer getRouteAnswer;

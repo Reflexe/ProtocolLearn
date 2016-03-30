@@ -46,7 +46,14 @@ SocketInterface::SocketInterface(const Interface &interface)
     mSocket.bind(socketAddress);
 }
 
-OctetVector SocketInterface::_recv() {
+OctetVector SocketInterface::_recv(const Timeout &timeout) {
+    {
+        auto timeToWait = timeout.howMuchTimeDoWeHave();
+
+        if (timeToWait != mCurrentTimeout)
+            mSocket.setTimeout(timeToWait);
+    }
+
     OctetVector data;
 
     try{

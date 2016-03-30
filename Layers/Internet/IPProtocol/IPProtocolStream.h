@@ -40,7 +40,7 @@ class IPProtocolStream : public PacketStreamUnderDataStream<IPProtocolPacket, No
 public:
     IPProtocolStream(InternetProtocol &internetProtocol);
 
-    virtual void _recv(IPProtocolPacket &packet) override;
+    virtual void _recv(IPProtocolPacket &packet, const Timeout &timeout) override;
     virtual void _send(IPProtocolPacket &packet) override;
 
     virtual void updatePseudoHeaderSend(IPProtocolPacket &packet) = 0;

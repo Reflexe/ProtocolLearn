@@ -43,8 +43,8 @@ public:
         mDataStream.setMinimumReceiveDataSize(PacketType::MinimumHeaderLength);
     }
 
-    virtual void _recv(PacketType &packet) override{
-        auto rawPacket = mDataStream.receiveData();
+    virtual void _recv(PacketType &packet, const Timeout &timeout) override{
+        auto rawPacket = mDataStream.receiveData(timeout);
 
         // Import data only if the data if at least the minmum header length.
         pl_assert(rawPacket.size() >= PacketType::MinimumHeaderLength);
@@ -55,14 +55,6 @@ public:
     virtual void _send(PacketType &packet) override
     {
         mDataStream.sendData(packet.toVectorRawPacket());
-    }
-
-    virtual void setTimeout(const Timeout::TimeType &time) override{
-        if(time == PacketStreamType::getTimeout())
-            return;
-
-        PacketStream<PacketType, FilterType>::setTimeout(time);
-        mDataStream.setTimeout(time);
     }
 
     virtual void setMinimumDataLength(OctetVector::SizeType minimumDataLength) override{

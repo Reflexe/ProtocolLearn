@@ -67,14 +67,14 @@ void Ipv4DataStream::_send(OctetVector &&data) {
     getSendPacket().removeData();
 }
 
-OctetVector Ipv4DataStream::_recv() {
+OctetVector Ipv4DataStream::_recv(const Timeout &timeout) {
     if(mIsFragmentionEnabled) {
-        if (receiveWithFragmention(getReceivePacket()) == false)
+        if (receiveWithFragmention(getReceivePacket(), timeout) == false)
             return OctetVector{};
         else
             return std::move(getReceivePacket().getVectorData());
     } else {
-        return DataStreamUnderPacketStream::_recv();
+        return DataStreamUnderPacketStream::_recv(timeout);
     }
 }
 
@@ -157,8 +157,8 @@ std::unique_ptr<InternetProtocol::InternetProtocolFork> Ipv4DataStream::fork(boo
                     isFragmentionEnabled()}};
 }
 
-bool Ipv4DataStream::receiveWithFragmention(Ipv4Packet &packet) {
-    getPacketStream().receivePacket(packet);
+bool Ipv4DataStream::receiveWithFragmention(Ipv4Packet &packet, const Timeout &timeout) {
+    getPacketStream().receivePacket(packet, timeout);
 
     if(Ipv4FragmentReassembler::isFragment(packet)) {
         if(mpFragmentReassemblers->enterPacket(std::move(packet)) == false)

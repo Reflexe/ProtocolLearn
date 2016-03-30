@@ -43,10 +43,9 @@ public:
     DataStreamUnderDataStream &operator =(DataStreamUnderDataStream &&) = default;
 
     // DataStream original functions.
-    virtual void setTimeout(const Timeout::TimeType &time) override;
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize) override;
 
-    virtual OctetVector _recv() override;
+    virtual OctetVector _recv(const Timeout &timeout) override;
     virtual void _send(OctetVector &&data) override;
 
     DataStream &getDataStream() const;

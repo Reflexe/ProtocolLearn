@@ -36,6 +36,9 @@
 
 #include <unistd.h>
 
+int usage(const char *programName);
+ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType ipv4FilterFunction(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet);
+
 int usage(const char *programName) {
     std::cout << "Usage: " << programName << " [Ipv4 Address] <Data>" << std::endl;
 
@@ -74,11 +77,10 @@ int main(int argc, char *argv[]) {
                 smartIpv4Stream.getSocketInterface().getIpv4Address()};
 
     IcmpStream icmpStream{ipv4DataStream};
-    icmpStream.setTimeout(PTime{2, 0});
 
     IcmpPacket icmpPacket;
-    icmpPacket.setSequence(Random::getMediumRandomNumber());
-    icmpPacket.setId(Random::getMediumRandomNumber());
+    icmpPacket.setSequence(static_cast<uint16_t>(Random::getMediumRandomNumber()));
+    icmpPacket.setId(static_cast<uint16_t>(Random::getMediumRandomNumber()));
     icmpPacket.setType(ICMP_ECHO);
     icmpPacket.setCode(0);
 
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
 
     try
     {
-        icmpStream.receivePacket(receivedPacket);
+        icmpStream.receivePacket(receivedPacket, PTime{2, 0});
     }
     catch(ProtocolLearn::Timeout::TimeoutException &){
         std::cout << "** No Answer." << std::endl;

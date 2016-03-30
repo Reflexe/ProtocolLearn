@@ -42,14 +42,16 @@ public:
     size_t recvmsg(msghdr &msgHeader) const;
     size_t sendmsg(const msghdr &msgHeader) const;
 
-    virtual OctetVector _recv() override;
+    virtual OctetVector _recv(const Timeout &timeout) override;
     virtual void _send(OctetVector &&data) override;
 
-    virtual void setTimeout(const Timeout::TimeType &timeout) override;
+    void setTimeout(const Timeout::TimeType &timeout);
 
     Socket &getSocket();
 
 private:
+    PTime mCurrentTimeout{PTime::infinity()};
+
     Socket mSocket;
 };
 

@@ -39,9 +39,9 @@ public:
         mPacketStream.setMinimumDataLength(BasePacketStreamType::PacketType::MinimumHeaderLength);
     }
 
-    virtual void _recv(typename BasePacketStreamType::PacketType &packet) override
+    virtual void _recv(typename BasePacketStreamType::PacketType &packet, const Timeout &timeout) override
     {
-        return mPacketStream.receivePacket(packet);
+        return mPacketStream.receivePacket(packet, timeout);
     }
 
     virtual void _send(typename BasePacketStreamType::PacketType &packet) override

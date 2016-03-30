@@ -41,25 +41,18 @@ public:
     PL_DECLARE_DEFAULT_VIRTUAL_DISRUCTOR(DataStream)
 
     virtual void sendData(OctetVector &&data);
-    virtual OctetVector receiveData();
-
-    OctetVector _receiveData();
+    virtual OctetVector receiveData(const Timeout &timeout);
 
     virtual void _send(OctetVector &&data) = 0;
-    virtual OctetVector _recv() = 0;
+    virtual OctetVector _recv(const Timeout &timeout) = 0;
 
     virtual void setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize);
     OctetVector::SizeType getMinimumReceiveDataSize() const;
-
-    virtual void setTimeout(const Timeout::TimeType &timeout);
-
-    const PTime &getTimeout() const;
 
 protected:
     bool checkByMinimumReceiveDataSize(const OctetVector &data);
 
     OctetVector::SizeType mMinimumReceiveDataSize = 1;
-    Timeout mTimeout{PTime::infinity()};
 };
 
 } // ProtocolLearn

@@ -43,8 +43,6 @@ ArpEthernetIpv4Resolver::ArpEthernetIpv4Resolver(const Interface &interface)
       mArpDataStream{mArpStream, ARPHRD_ETHER, ETH_P_IP, MacAddress::MacAddressLength, Ipv4Address::Ipv4AddressLength, ARPOP_REQUEST},
       mArpEthernetIpv4Stream{mArpDataStream}
 {
-    // Wait 40 milliseconds.
-    mArpEthernetIpv4Stream.setTimeout(PTime{0, 40000});
 }
 
 ArpEthernetIpv4Resolver::~ArpEthernetIpv4Resolver()
@@ -60,7 +58,9 @@ MacAddress ArpEthernetIpv4Resolver::resolve(const Ipv4Address &ipv4Address) {
     arpPacket.setTargetMacAddress(MacAddress{});
 
     mArpEthernetIpv4Stream.sendPacket(arpPacket);
-    mArpEthernetIpv4Stream.receivePacket(arpPacket);
+
+    // Wait 40 milliseconds.
+    mArpEthernetIpv4Stream.receivePacket(arpPacket, PTime{0, 40000});
 
     return arpPacket.getSenderMacAddress();
 }

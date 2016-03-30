@@ -33,8 +33,9 @@ int main(int argc, char *argv[]) {
     if(argc != 3)
         return EXIT_FAILURE;
 
-    ProtocolLearn::Debug::addDebbugedClass("Protocols/Tcp");
+    ProtocolLearn::Debug::addDebbugedClass("Layers/Transport/Tcp");
     ProtocolLearn::Debug::addDebbugedClass("Examples/Tcpv4/Tcpv4Client");
+    ProtocolLearn::Debug::addDebbugedClass("Utilities/ProtocolFilter");
 
     using ProtocolLearn::Interface;
     using ProtocolLearn::MacAddress;
@@ -52,17 +53,18 @@ int main(int argc, char *argv[]) {
 
     TcpStream tcpIpv4Stream{ipProtocolIpv4};
     auto tcpIpv4DataStream = TcpDataStream::connect(tcpIpv4Stream,
-                                                    ProtocolLearn::Convertions::toInteger<uint16_t>(std::string(argv[2])));
+                                                    ProtocolLearn::Convertions::toInteger<uint16_t>(std::string(argv[2])),
+            ProtocolLearn::PTime::infinity());
 
     {
         std::string message = "DigitalWhisper!";
         ProtocolLearn::OctetVector octetVector{message.begin(), message.end()};
 
         tcpIpv4DataStream.sendData(std::move(octetVector));
-        tcpIpv4DataStream.sync();
+        tcpIpv4DataStream.sync(ProtocolLearn::PTime::infinity());
     }
 
-    tcpIpv4DataStream.close();
+    tcpIpv4DataStream.close(ProtocolLearn::PTime::infinity());
 
 //    tcpIpv4DataStream.sendData();
 

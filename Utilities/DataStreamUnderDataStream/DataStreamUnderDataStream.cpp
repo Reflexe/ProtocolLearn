@@ -32,9 +32,9 @@ DataStreamUnderDataStream::DataStreamUnderDataStream(ProtocolLearn::DataStream &
 {
 }
 
-OctetVector DataStreamUnderDataStream::_recv()
+OctetVector DataStreamUnderDataStream::_recv(const Timeout &timeout)
 {
-    return dataStream.receiveData();
+    return dataStream.receiveData(timeout);
 }
 
 void DataStreamUnderDataStream::_send(OctetVector &&data)
@@ -45,14 +45,6 @@ void DataStreamUnderDataStream::_send(OctetVector &&data)
 DataStream &DataStreamUnderDataStream::getDataStream() const
 {
     return dataStream;
-}
-
-void DataStreamUnderDataStream::setTimeout(const Timeout::TimeType &time) {
-    if(getTimeout() == time)
-        return;
-
-    DataStream::setTimeout(time);
-    dataStream.setTimeout(time);
 }
 
 void DataStreamUnderDataStream::setMinimumReceiveDataSize(OctetVector::SizeType minimumDataSize) {

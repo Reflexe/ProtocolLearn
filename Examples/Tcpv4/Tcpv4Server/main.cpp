@@ -29,6 +29,9 @@
 #include "IPProtocolIpv4.h"
 #include "TcpServer.h"
 
+ProtocolLearn::Ethernet::EthernetFilter::DropReasonType ethernetFilterCallback(const ProtocolLearn::Ethernet::EthernetPacket &filteredPacket);
+ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType ipv4FilterCallback(const ProtocolLearn::Ipv4::Ipv4Packet &ipv4Packet);
+
 ProtocolLearn::Ethernet::EthernetFilter::DropReasonType ethernetFilterCallback(const ProtocolLearn::Ethernet::EthernetPacket &filteredPacket) {
     using ProtocolLearn::Ethernet::EthernetFilter;
 
@@ -41,7 +44,7 @@ ProtocolLearn::Ipv4::Ipv4Filter::DropReasonType ipv4FilterCallback(const Protoco
     return ipv4Packet.getProtocol() == IPPROTO_TCP ? Ipv4Filter::DropReason::None : Ipv4Filter::DropReason::NoReason;
 }
 
-int main(int argc, char *argv[]) {
+int main(int , char *argv[]) {
     ProtocolLearn::Debug::addDebbugedClass("Layers/Transport/Tcp");
     ProtocolLearn::Debug::addDebbugedClass("Layers/Internet/Ipv4");
     ProtocolLearn::Debug::addDebbugedClass("Utilities/TcpIpv4OptionsParser");
@@ -74,20 +77,19 @@ int main(int argc, char *argv[]) {
 
     pl_debug("Waiting for connection!");
 
-    auto newConnection = tcpIpv4Server.accept();
+    auto newConnection = tcpIpv4Server.accept(ProtocolLearn::PTime::infinity());
     auto &tcpDataStream = newConnection->tcpDataStream;
 
     pl_debug("Accepted! from: " << ipv4DataStream.getReceivePacket().getSource().toString());
 
     ProtocolLearn::OctetVector octetVector;
 
-    tcpDataStream.setTimeout(ProtocolLearn::PTime::infinity());
 //    tcpDataStream.setMinimumReceiveDataSize(0);
 
     while(tcpDataStream.isConnected()) {
         pl_debug("Receiving data..");
         try {
-            octetVector = tcpDataStream.receiveData();
+            octetVector = tcpDataStream.receiveData(ProtocolLearn::PTime::infinity());
         } catch(ProtocolLearn::Tcp::TcpDataStream::NotConnectedStream &) {
             break;
         }
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
     }
 
     pl_debug("Done.");
-    tcpDataStream.close();
+    tcpDataStream.close(ProtocolLearn::PTime::infinity());
 
     return 0;
 }

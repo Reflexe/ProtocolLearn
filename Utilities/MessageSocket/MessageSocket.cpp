@@ -91,8 +91,15 @@ void MessageSocket::receiveMessage(std::vector<uint8_t> &data) const{
     data.resize(recvmsg(msgHeader));
 }
 
-OctetVector MessageSocket::_recv() {
+OctetVector MessageSocket::_recv(const Timeout &timeout) {
+    {
+        auto timeToWait = timeout.getTimeToWait();
+        if (mCurrentTimeout != timeToWait)
+            setTimeout(timeToWait);
+    }
+
     OctetVector data;
+
     receiveMessage(data);
     return data;
 }
@@ -104,7 +111,7 @@ void MessageSocket::_send(OctetVector &&data)
 
 void MessageSocket::setTimeout(const Timeout::TimeType &timeout) {
     mSocket.setTimeout(timeout);
-    DataStream::setTimeout(timeout);
+    mCurrentTimeout = timeout;
 }
 
 Socket &MessageSocket::getSocket()

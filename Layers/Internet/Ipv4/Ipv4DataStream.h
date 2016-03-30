@@ -52,7 +52,7 @@ public:
     };
 
     virtual void _send(OctetVector &&data) override final;
-    virtual OctetVector _recv() override final; 
+    virtual OctetVector _recv(const Timeout &timeout) override final;
 
     virtual OctetVector::SizeType getMaximumSendDataLength() override final;
     virtual OctetVector::SizeType getRealMaximumSendDataLength() override final;
@@ -64,7 +64,7 @@ public:
 
     virtual std::unique_ptr<InternetProtocolFork> fork(bool reply=false) override;
 private:
-    bool receiveWithFragmention(Ipv4Packet &packet);
+    bool receiveWithFragmention(Ipv4Packet &packet, const Timeout &timeout);
     void sendWithFragmention(Ipv4Packet &packet);
 
     bool mIsFragmentionEnabled = false;
