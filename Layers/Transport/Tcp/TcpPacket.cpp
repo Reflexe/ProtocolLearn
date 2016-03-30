@@ -78,6 +78,15 @@ OctetVector::SizeType TcpPacket::getSegementLength() const{
     return segementLength;
 }
 
+void TcpPacket::fromRawPacket(OctetVector &&rawPacket) {
+    OctetVector::SizeType headerSize = rawPacket.getAsObject<TcpHeader>().offset * 4;
+
+    if(headerSize > rawPacket.size() || headerSize < getMinimumHeaderLength())
+        return PacketWrapper::fromRawPacket(std::move(rawPacket), getMinimumHeaderLength());
+    else
+        return PacketWrapper::fromRawPacket(std::move(rawPacket), headerSize);
+}
+
 uint16_t TcpPacket::calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data) {
     InternetChecksum internetChecksum;
 

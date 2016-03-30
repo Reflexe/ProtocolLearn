@@ -139,6 +139,8 @@ public:
 
     ParsingError getParsingError() const{ return mParsingError; }
 
+    virtual void fromRawPacket(OctetVector &&rawPacket) override final;
+
 private:
     static uint16_t calculateChecksum(const OctetVector &pseudoHeader, const OctetVector &header, const OctetVector &data);
 
