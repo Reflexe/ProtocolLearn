@@ -195,7 +195,8 @@ void TcpDataStream::sync(const Timeout &timeout, bool sendACKs) {
         retransmitPackets();
     } while (waitForPacket(TcpPacketType::SycedAck,
                            // We're taking either the given timeout or the retransmition queue's oldest timeout.
-                           Timeout{std::min(timeout.getTimeout(), mRetransmitQueue.front().timeout.getTimeout())},
+                           Timeout{timeout.getTimeout() < mRetransmitQueue.front().timeout.getTimeout() ? timeout
+                           : mRetransmitQueue.front().timeout.getTimeout()},
                            sendACKs) == false);
 }
 
