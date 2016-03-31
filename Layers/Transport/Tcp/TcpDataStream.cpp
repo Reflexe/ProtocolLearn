@@ -181,22 +181,22 @@ void TcpDataStream::setMinimumReceiveDataSize(OctetVector::SizeType minimumDataS
 }
 
 void TcpDataStream::sync(const Timeout &timeout, bool sendACKs) {
-    pl_assert(timeout.howMuchTimeDoWeHave() > mRetransmitionTimeout);
-
     // If we're already synced.
     if(getOurTCB().window.isSynced())
         return;
 
     do {
-        if (mRetransmitQueue.empty())
-            return;
-
         if (timeout.isPassed() == true)
             throw Timeout::TimeoutException{"TcpDataStream::sync"};
 
+        if (mRetransmitQueue.empty() || getTcpState() == TcpFilter::Closed)
+            return;
+
         retransmitPackets();
-    } while (getTcpState() != TcpFilter::Closed
-             && waitForPacket(TcpPacketType::SycedAck, mRetransmitionTimeout, sendACKs) == false);
+    } while (waitForPacket(TcpPacketType::SycedAck,
+                           // We're taking either the given timeout or the retransmition queue's oldest timeout.
+                           Timeout{std::min(timeout.getTimeout(), mRetransmitQueue.front().timeout.getTimeout())},
+                           sendACKs) == false);
 }
 
 void TcpDataStream::close(const Timeout &timeout) {
