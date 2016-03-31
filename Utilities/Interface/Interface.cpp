@@ -119,7 +119,7 @@ Interface::InterfaceIndex Interface::inerfaceNameToInterfaceIndex(const std::str
     InterfaceIndex interfaceIndex = if_nametoindex(name.c_str());
 
     if(interfaceIndex == 0)
-        throw InvalidArgument(std::string("invalid name: ") + name);
+        throw InvalidArgument(std::string("invalid interface name: ") + name);
 
     return interfaceIndex;
 }
