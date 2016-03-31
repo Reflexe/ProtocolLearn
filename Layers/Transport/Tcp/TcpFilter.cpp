@@ -232,10 +232,8 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
 
     if(filteredPacket.getSourcePort() != mTcpSession.your.port)
         return InvalidSourcePort;
-    if(filteredPacket.getAcknowledgmentFlag() == false)
-        return AcknowledgmentRqeuired;
-    if(isValidAcknowledmentNumber(mTcpSession.our, acknowledgmentNumber) == false)
-        return InvalidAcknowledgment;
+    if(isValidSequenceNumber(mTcpSession.your, sequenceNumber, segementLength) == false)
+        return InvalidSequence;
 
     // This is not actualy what the standrart says about SynReceived (setTcpState(Listen)), but this is a new stream.
     // @see Network Notes:4 for more information about the second part of the condition.
@@ -244,8 +242,10 @@ TcpFilter::DropReasonType TcpFilter::checkByPreviousPacket(const TcpPacket &filt
         return success();
     }
 
-    if(isValidSequenceNumber(mTcpSession.your, sequenceNumber, segementLength) == false)
-        return InvalidSequence;
+    if(filteredPacket.getAcknowledgmentFlag() == false)
+        return AcknowledgmentRqeuired;
+    if(isValidAcknowledmentNumber(mTcpSession.our, acknowledgmentNumber) == false)
+        return InvalidAcknowledgment;
 
     switch (mTcpSession.tcpState) {
     case SynReceived:

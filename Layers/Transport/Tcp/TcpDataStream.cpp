@@ -156,7 +156,10 @@ void TcpDataStream::_send(OctetVector &&data){
 
 OctetVector TcpDataStream::_recv(const Timeout &timeout) {
     if(mReceiveQueue.empty()) {
-        while(waitForPacket(TcpPacketType::DataPacket, timeout) == false || mReceiveQueue.empty()) {
+        checkIfStreamReadConnected("TcpDataStream::_recv");
+
+        while(waitForPacket(TcpPacketType::DataPacket, timeout) == false
+              || mReceiveQueue.empty()) {
             if(timeout.isPassed())
                 throw Timeout::TimeoutException{"TcpDataStream::_recv"};
 
@@ -192,7 +195,8 @@ void TcpDataStream::sync(const Timeout &timeout, bool sendACKs) {
             throw Timeout::TimeoutException{"TcpDataStream::sync"};
 
         retransmitPackets();
-    } while (waitForPacket(TcpPacketType::SycedAck, mRetransmitionTimeout, sendACKs) == false);
+    } while (getTcpState() != TcpFilter::Closed
+             && waitForPacket(TcpPacketType::SycedAck, mRetransmitionTimeout, sendACKs) == false);
 }
 
 void TcpDataStream::close(const Timeout &timeout) {
