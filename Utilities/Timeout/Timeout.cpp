@@ -62,6 +62,11 @@ const PTime &Timeout::getTimeToWait() const
     return mTimeToWait;
 }
 
+const PTime &Timeout::getTimeout() const
+{
+    return mTimeout;
+}
+
 bool Timeout::isPassed() const{
     if(isInfinite())
         return false;
@@ -79,11 +84,12 @@ PTime Timeout::howMuchTimeDoWeHave() const{
 }
 
 void Timeout::start() {
-    if(isInfinite() || isNoTime())
-        return;
-
-    mTimeout = PTime::now();
-    mTimeout += mTimeToWait;
+    if(isInfinite() || isNoTime()) {
+        mTimeout = mTimeToWait;
+    } else {
+        mTimeout = PTime::now();
+        mTimeout += mTimeToWait;
+    }
 }
 
 } // ProtocolLearn

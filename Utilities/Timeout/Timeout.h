@@ -86,6 +86,8 @@ public:
 
     const PTime &getTimeToWait() const;
 
+    const PTime &getTimeout() const;
+
 private:
     /**
      * @brief mTimeVal  Time to wait.
