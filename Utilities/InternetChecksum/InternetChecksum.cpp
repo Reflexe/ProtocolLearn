@@ -55,7 +55,7 @@ uint16_t InternetChecksum::calculateInternetChecksum() {
     while(mResult >> 16)
         mResult = (mResult & 0xffff) + (mResult >> 16);
 
-    return static_cast<uint16_t>(mResult);
+    return static_cast<uint16_t>(~mResult);
 }
 
 } // namespace ProtocolLearn
