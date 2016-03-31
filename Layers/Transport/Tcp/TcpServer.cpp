@@ -37,29 +37,29 @@ TcpServer::TcpServer(TcpStream &tcpStream, uint16_t ourPort)
 TcpPacket TcpServer::receiveSyn() {
     TcpPacket receivePacket;
 
-    mTcpStream.receivePacket(receivePacket);
+    // We can wait forever :)
+    mTcpStream.receivePacket(receivePacket, PTime::infinity());
 
     return receivePacket;
 }
 
 void TcpServer::listen(uint16_t port) {
-    mTcpStream.setTimeout(PTime::infinity()); // We can wait forever :)
     mTcpStream.getTcpSession().our.port = port;
     mTcpStream.setTcpState(TcpFilter::Listen);
 }
 
-std::unique_ptr<TcpServer::NewConnection> TcpServer::accept() {
+std::unique_ptr<TcpServer::NewConnection> TcpServer::accept(const Timeout &timeout) {
     pl_debug("ReceiveSYN!!");
     receiveSyn();
     pl_debug("received!");
 
-    return std::unique_ptr<TcpServer::NewConnection>{new NewConnection{mTcpStream}};
+    return std::unique_ptr<TcpServer::NewConnection>{new NewConnection{mTcpStream, timeout}};
 }
 
-TcpServer::NewConnection::NewConnection(TcpStream &serverTcpStream)
+TcpServer::NewConnection::NewConnection(TcpStream &serverTcpStream, const Timeout &timeout)
     : mIPProtocol{serverTcpStream.getPacketStream().fork(true)},
       tcpStream{mIPProtocol->getIPProtocol()},
-      tcpDataStream{TcpDataStream::completeAccept(tcpStream, serverTcpStream.getTcpSession())}
+      tcpDataStream{TcpDataStream::completeAccept(tcpStream, serverTcpStream.getTcpSession(), PTime{2, 0})}
 {
     serverTcpStream.setTcpState(TcpFilter::Listen);
 }

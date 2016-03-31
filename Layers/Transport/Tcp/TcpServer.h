@@ -47,14 +47,14 @@ public:
     void listen(uint16_t port);
 
     struct NewConnection{
-        NewConnection(TcpStream &serverTcpStream);
+        NewConnection(TcpStream &serverTcpStream, const Timeout &timeout);
 
         std::unique_ptr<IPProtocolStream::IPProtocolStreamFork> mIPProtocol;
         TcpStream tcpStream;
         TcpDataStream tcpDataStream;
     };
 
-    std::unique_ptr<NewConnection> accept();
+    std::unique_ptr<NewConnection> accept(const Timeout &timeout);
 
 protected:
     TcpStream &mTcpStream;
